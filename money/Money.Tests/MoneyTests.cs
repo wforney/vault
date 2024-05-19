@@ -1,11 +1,10 @@
+namespace money.Tests;
+
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Threading;
-using NUnit.Framework;
-
-namespace money.Tests;
 
 [TestFixture]
 public class MoneyTests
@@ -17,7 +16,7 @@ public class MoneyTests
         const double right = 20.00;
 
         Money total = left + right;
-        Assert.AreEqual(30.00, (double) total);
+        Assert.AreEqual(30.00, (double)total);
     }
 
     [Test]
@@ -25,7 +24,7 @@ public class MoneyTests
     {
         Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         Money money = 10.00;
-        Assert.AreEqual(10.00, (double) money);
+        Assert.AreEqual(10.00, (double)money);
     }
 
     [Test]
@@ -33,7 +32,7 @@ public class MoneyTests
     {
         Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         Money money = 1000;
-        Assert.AreEqual(1000.00, (double) money);
+        Assert.AreEqual(1000.00, (double)money);
     }
 
     [Test]
@@ -70,9 +69,9 @@ public class MoneyTests
 
         Assert.IsFalse(left == right);
         Assert.IsFalse(left.Equals(right));
-        Assert.IsFalse((long) left == (long) right);
-        Assert.IsFalse(left == (long) right);
-        Assert.IsFalse((long) left == right);
+        Assert.IsFalse((long)left == (long)right);
+        Assert.IsFalse(left == (long)right);
+        Assert.IsFalse((long)left == right);
     }
 
     [Test]
@@ -118,8 +117,8 @@ public class MoneyTests
         const double left = 20.00;
         const double right = 2.00;
 
-        Money total = left/right;
-        Assert.AreEqual(10.00, (double) total);
+        Money total = left / right;
+        Assert.AreEqual(10.00, (double)total);
     }
 
     [Test]
@@ -138,7 +137,7 @@ public class MoneyTests
         var left = new Money(1);
         var right = new Money(-1);
 
-        var total = right/left;
+        var total = right / left;
         Assert.AreEqual(-1, total);
     }
 
@@ -158,7 +157,7 @@ public class MoneyTests
         var left = new Money(1);
         var right = new Money(1);
 
-        var total = right/left;
+        var total = right / left;
         Assert.AreEqual(1, total);
     }
 
@@ -178,9 +177,9 @@ public class MoneyTests
         Money left = 45;
         Money right = 13;
 
-        var total = left/right; // 3.461538461538462
+        var total = left / right; // 3.461538461538462
 
-        Assert.AreEqual(3.46, (double) total);
+        Assert.AreEqual(3.46, (double)total);
     }
 
     [Test]
@@ -198,7 +197,7 @@ public class MoneyTests
     public void Can_handle_small_fractions()
     {
         Money total = 0.1;
-        Assert.AreEqual(0.10, (double) total);
+        Assert.AreEqual(0.10, (double)total);
     }
 
     [Test]
@@ -214,8 +213,8 @@ public class MoneyTests
         var left = new Money(1.00);
         var right = new Money(1.00);
 
-        var total = right*left;
-        Assert.AreEqual(1.00, (double) total);
+        var total = right * left;
+        Assert.AreEqual(1.00, (double)total);
     }
 
     [Test]
@@ -234,8 +233,8 @@ public class MoneyTests
         var left = new Money(10.00);
         var right = new Money(20.00);
 
-        var total = right*left;
-        Assert.AreEqual(200.00, (double) total);
+        var total = right * left;
+        Assert.AreEqual(200.00, (double)total);
     }
 
     [Test]
@@ -254,8 +253,8 @@ public class MoneyTests
         const double left = 1.00;
         const double right = -1;
 
-        Money total = right*left;
-        Assert.AreEqual(-1, (double) total);
+        Money total = right * left;
+        Assert.AreEqual(-1, (double)total);
     }
 
     [Test]
@@ -264,8 +263,8 @@ public class MoneyTests
         const double left = 1.00;
         const double right = 1;
 
-        Money total = right*left;
-        Assert.AreEqual(1, (double) total);
+        Money total = right * left;
+        Assert.AreEqual(1, (double)total);
     }
 
     [Test]
@@ -274,23 +273,23 @@ public class MoneyTests
         var left = new Money(4.00);
         var right = new Money(4.00);
 
-        var total = right*left;
-        Assert.AreEqual(16.00, (double) total);
+        var total = right * left;
+        Assert.AreEqual(16.00, (double)total);
     }
 
     [Test]
     public void Can_preserve_internal_precision()
     {
-        Money total = 0.335678*345; // 115.80891
+        Money total = 0.335678 * 345; // 115.80891
 
         // Loss of precision based on rounding rules
-        Assert.AreEqual(115.81, (double) total);
+        Assert.AreEqual(115.81, (double)total);
 
-        // Adding .005 to 115.81 would equal 115.82 
+        // Adding .005 to 115.81 would equal 115.82
         // due to rounding if precision was lost
         total += 0.005; // 115.81391
 
-        Assert.AreEqual(115.81, (double) total);
+        Assert.AreEqual(115.81, (double)total);
     }
 
     [Test]
@@ -301,7 +300,7 @@ public class MoneyTests
         // Loss of precision based on rounding rules
         Assert.AreEqual(115.81m, total);
 
-        // Adding .005 to 115.81 would equal 115.82 
+        // Adding .005 to 115.81 would equal 115.82
         // due to rounding if precision was lost
         total += 0.005m; // 115.81391
 
@@ -311,15 +310,15 @@ public class MoneyTests
     [Test]
     public void Can_preserve_internal_rounding_against_larger_fractions()
     {
-        Money total = 0.335678*345; // 115.80891
+        Money total = 0.335678 * 345; // 115.80891
 
         // Loss of precision based on rounding rules
-        Assert.AreEqual(115.81, (double) total);
+        Assert.AreEqual(115.81, (double)total);
 
         // This number has greater precision than the original
         total += .00082809; // 115.80973809
 
-        Assert.AreEqual(115.81, (double) total);
+        Assert.AreEqual(115.81, (double)total);
     }
 
     [Test]
@@ -339,15 +338,15 @@ public class MoneyTests
     [Test]
     public void Can_preserve_internal_rounding_against_smaller_fractions()
     {
-        Money total = 0.335678*345; // 115.80891
+        Money total = 0.335678 * 345; // 115.80891
 
         // Loss of precision based on rounding rules
-        Assert.AreEqual(115.81, (double) total);
+        Assert.AreEqual(115.81, (double)total);
 
         // This number has lesser precision than the original
         total += .456; // 116.26491
 
-        Assert.AreEqual(116.26, (double) total);
+        Assert.AreEqual(116.26, (double)total);
     }
 
     [Test]
@@ -371,7 +370,7 @@ public class MoneyTests
         const double right = 20.00;
 
         Money total = right - left;
-        Assert.AreEqual(10.00, (double) total);
+        Assert.AreEqual(10.00, (double)total);
     }
 
     [Test]
@@ -379,12 +378,13 @@ public class MoneyTests
     {
         var left = new Money(Currency.CAD, 10.00);
         var right = new Money(Currency.USD, 20.00);
-        
-        Assert.Throws(typeof (ArithmeticException), () =>
-                                                        {
-                                                            var total = left + right;
-                                                            Console.WriteLine(total);
-                                                        });
+
+        Assert.Throws<ArithmeticException>(
+            () =>
+            {
+                var total = left + right;
+                Console.WriteLine(total);
+            });
     }
 
     [Test]
@@ -395,6 +395,7 @@ public class MoneyTests
         {
             monies.Add(new Money(1.45m));
         }
+
         var value = new Money(0);
         foreach (var money in monies)
         {
@@ -403,5 +404,4 @@ public class MoneyTests
 
         Console.WriteLine(value.ToString()); // Outputs 14, but is actually stored internally as $14.50
     }
-
 }
