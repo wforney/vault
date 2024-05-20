@@ -1,15 +1,11 @@
+namespace ChainLib.Tests.Wallets.Fixtures;
+
 using ChainLib.Wallets;
 using ChainLib.Wallets.StorageFormats;
 
-namespace ChainLib.Tests.Wallets.Fixtures
+public class WifAddressStorageFormatFixture
 {
-    public class WifAddressStorageFormatFixture
-    {
-        public WifAddressStorageFormatFixture()
-        {
-            Value = new WifAddressStorageFormat();
-        }
+    public WifAddressStorageFormatFixture() => this.Value = new WifAddressStorageFormat();
 
-        public IWalletAddressStorageFormat Value { get; set; }
-    }
+    public IWalletAddressStorageFormat Value { get; set; }
 }

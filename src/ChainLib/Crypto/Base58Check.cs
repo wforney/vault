@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Numerics;
-using System.Security.Cryptography;
-
-namespace ChainLib.Crypto
+﻿namespace ChainLib.Crypto
 {
+    using System;
+    using System.Linq;
+    using System.Numerics;
+    using System.Security.Cryptography;
+
     /// <summary>
     /// https://github.com/adamcaudill/Base58Check
     /// Base58Check Encoding / Decoding (Bitcoin-style) 
@@ -22,10 +22,7 @@ namespace ChainLib.Crypto
         /// </summary>
         /// <param name="data">Data to be encoded</param>
         /// <returns></returns>
-        public static string Encode(byte[] data)
-        {
-            return EncodePlain(AddCheckSum(data));
-        }
+        public static string Encode(byte[] data) => EncodePlain(AddCheckSum(data));
 
         /// <summary>
         /// Encodes data in plain Base58, without any checksum.
@@ -35,19 +32,19 @@ namespace ChainLib.Crypto
         public static string EncodePlain(byte[] data)
         {
             // Decode byte[] to BigInteger
-            var intData = data.Aggregate<byte, BigInteger>(0, (current, t) => current * 256 + t);
+            BigInteger intData = data.Aggregate<byte, BigInteger>(0, (current, t) => (current * 256) + t);
 
             // Encode BigInteger to Base58 string
-            var result = string.Empty;
+            string result = string.Empty;
             while (intData > 0)
             {
-                var remainder = (int)(intData % 58);
+                int remainder = (int)(intData % 58);
                 intData /= 58;
                 result = Digits[remainder] + result;
             }
 
             // Append `1` for each leading 0 byte
-            for (var i = 0; i < data.Length && data[i] == 0; i++)
+            for (int i = 0; i < data.Length && data[i] == 0; i++)
             {
                 result = '1' + result;
             }
@@ -62,15 +59,10 @@ namespace ChainLib.Crypto
         /// <returns>Returns decoded data if valid; throws FormatException if invalid</returns>
         public static byte[] Decode(string data)
         {
-            var dataWithCheckSum = DecodePlain(data);
-            var dataWithoutCheckSum = VerifyAndRemoveCheckSum(dataWithCheckSum);
+            byte[] dataWithCheckSum = DecodePlain(data);
+            byte[] dataWithoutCheckSum = VerifyAndRemoveCheckSum(dataWithCheckSum);
 
-            if (dataWithoutCheckSum == null)
-            {
-                throw new FormatException("Base58 checksum is invalid");
-            }
-
-            return dataWithoutCheckSum;
+            return dataWithoutCheckSum ?? throw new FormatException("Base58 checksum is invalid");
         }
 
         /// <summary>
@@ -82,44 +74,44 @@ namespace ChainLib.Crypto
         {
             // Decode Base58 string to BigInteger 
             BigInteger intData = 0;
-            for (var i = 0; i < data.Length; i++)
+            for (int i = 0; i < data.Length; i++)
             {
-                var digit = Digits.IndexOf(data[i]); //Slow
+                int digit = Digits.IndexOf(data[i]); //Slow
 
                 if (digit < 0)
                 {
                     throw new FormatException(string.Format("Invalid Base58 character `{0}` at position {1}", data[i], i));
                 }
 
-                intData = intData * 58 + digit;
+                intData = (intData * 58) + digit;
             }
 
             // Encode BigInteger to byte[]
             // Leading zero bytes get encoded as leading `1` characters
-            var leadingZeroCount = data.TakeWhile(c => c == '1').Count();
-            var leadingZeros = Enumerable.Repeat((byte)0, leadingZeroCount);
-            var bytesWithoutLeadingZeros =
+            int leadingZeroCount = data.TakeWhile(c => c == '1').Count();
+            System.Collections.Generic.IEnumerable<byte> leadingZeros = Enumerable.Repeat((byte)0, leadingZeroCount);
+            System.Collections.Generic.IEnumerable<byte> bytesWithoutLeadingZeros =
                 intData.ToByteArray()
                     .Reverse()// to big endian
                     .SkipWhile(b => b == 0);//strip sign byte
-            var result = leadingZeros.Concat(bytesWithoutLeadingZeros).ToArray();
+            byte[] result = leadingZeros.Concat(bytesWithoutLeadingZeros).ToArray();
 
             return result;
         }
 
         private static byte[] AddCheckSum(byte[] data)
         {
-            var checkSum = GetCheckSum(data);
-            var dataWithCheckSum = ConcatArrays(data, checkSum);
+            byte[] checkSum = GetCheckSum(data);
+            byte[] dataWithCheckSum = ConcatArrays(data, checkSum);
             return dataWithCheckSum;
         }
 
         //Returns null if the checksum is invalid
         private static byte[] VerifyAndRemoveCheckSum(byte[] data)
         {
-            var result = SubArray(data, 0, data.Length - CheckSumSize);
-            var givenCheckSum = SubArray(data, data.Length - CheckSumSize);
-            var correctCheckSum = GetCheckSum(result);
+            byte[] result = SubArray(data, 0, data.Length - CheckSumSize);
+            byte[] givenCheckSum = SubArray(data, data.Length - CheckSumSize);
+            byte[] correctCheckSum = GetCheckSum(result);
 
             return givenCheckSum.SequenceEqual(correctCheckSum) ? result : null;
         }
@@ -127,20 +119,20 @@ namespace ChainLib.Crypto
         private static byte[] GetCheckSum(byte[] data)
         {
             SHA256 sha256 = new SHA256Managed();
-            var hash1 = sha256.ComputeHash(data);
-            var hash2 = sha256.ComputeHash(hash1);
+            byte[] hash1 = sha256.ComputeHash(data);
+            byte[] hash2 = sha256.ComputeHash(hash1);
 
-            var result = new byte[CheckSumSize];
+            byte[] result = new byte[CheckSumSize];
             Buffer.BlockCopy(hash2, 0, result, 0, result.Length);
             return result;
         }
 
         public static T[] ConcatArrays<T>(params T[][] arrays)
         {
-            var result = new T[arrays.Sum(arr => arr.Length)];
-            var offset = 0;
+            T[] result = new T[arrays.Sum(arr => arr.Length)];
+            int offset = 0;
 
-            foreach (var arr in arrays)
+            foreach (T[] arr in arrays)
             {
                 Buffer.BlockCopy(arr, 0, result, offset, arr.Length);
                 offset += arr.Length;
@@ -151,7 +143,7 @@ namespace ChainLib.Crypto
 
         public static T[] ConcatArrays<T>(this T[] arr1, T[] arr2)
         {
-            var result = new T[arr1.Length + arr2.Length];
+            T[] result = new T[arr1.Length + arr2.Length];
             Buffer.BlockCopy(arr1, 0, result, 0, arr1.Length);
             Buffer.BlockCopy(arr2, 0, result, arr1.Length, arr2.Length);
             return result;
@@ -159,14 +151,11 @@ namespace ChainLib.Crypto
 
         public static T[] SubArray<T>(this T[] arr, int start, int length)
         {
-            var result = new T[length];
+            T[] result = new T[length];
             Buffer.BlockCopy(arr, start, result, 0, length);
             return result;
         }
 
-        public static T[] SubArray<T>(this T[] arr, int start)
-        {
-            return SubArray(arr, start, arr.Length - start);
-        }
+        public static T[] SubArray<T>(this T[] arr, int start) => SubArray(arr, start, arr.Length - start);
     }
 }

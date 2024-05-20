@@ -1,9 +1,9 @@
-﻿using ChainLib.Serialization;
-
-namespace ChainLib.Models
+﻿namespace ChainLib.Models
 {
-	public interface IBlockSerialized
-	{
-		void Serialize(BlockSerializeContext context);
-	}
+    using ChainLib.Serialization;
+
+    public interface IBlockSerialized
+    {
+        void Serialize(BlockSerializeContext context);
+    }
 }

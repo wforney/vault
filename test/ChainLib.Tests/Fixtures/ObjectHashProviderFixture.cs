@@ -1,14 +1,10 @@
+namespace ChainLib.Tests.Fixtures;
+
 using ChainLib.Models;
 
-namespace ChainLib.Tests.Fixtures
+public class ObjectHashProviderFixture
 {
-    public class ObjectHashProviderFixture
-    {
-        public ObjectHashProviderFixture()
-        {
-            Value = new ObjectHashProvider();
-        }
+    public ObjectHashProviderFixture() => this.Value = new ObjectHashProvider();
 
-        public IHashProvider Value { get; set; }
-    }
+    public IHashProvider Value { get; set; }
 }

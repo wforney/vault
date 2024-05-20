@@ -1,22 +1,22 @@
-﻿using System.Security.Cryptography;
-using ChainLib.Crypto;
-
-namespace ChainLib.Wallets.Addresses
+﻿namespace ChainLib.Wallets.Addresses
 {
+    using ChainLib.Crypto;
+    using System.Security.Cryptography;
+
     public class RandomWalletAddressProvider : IWalletAddressProvider
     {
         private readonly ushort _buffer;
 
-        public RandomWalletAddressProvider(ushort bitsOfEntropy = 256)
-        {
-            _buffer = (ushort) (bitsOfEntropy / 8);
-        }
-        
+        public RandomWalletAddressProvider(ushort bitsOfEntropy = 256) => this._buffer = (ushort)(bitsOfEntropy / 8);
+
         public string GenerateAddress(Wallet wallet)
         {
-            var randomBytes = new byte[_buffer];
-            using (var rng = RandomNumberGenerator.Create())
+            byte[] randomBytes = new byte[this._buffer];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
                 rng.GetBytes(randomBytes);
+            }
+
             return randomBytes.ToHex();
         }
     }

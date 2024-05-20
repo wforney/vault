@@ -1,15 +1,11 @@
+namespace ChainLib.Tests.Wallets.Fixtures;
+
 using ChainLib.Wallets;
 using ChainLib.Wallets.Secrets;
 
-namespace ChainLib.Tests.Wallets.Fixtures
+public class WalletSecretProviderFixture
 {
-    public class WalletSecretProviderFixture
-    {
-        public WalletSecretProviderFixture()
-        {
-            Value = new PasswordHashSecretProvider();
-        }
+    public WalletSecretProviderFixture() => this.Value = new PasswordHashSecretProvider();
 
-        public IWalletSecretProvider Value { get; set; }
-    }
+    public IWalletSecretProvider Value { get; set; }
 }

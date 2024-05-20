@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using ChainLib.Crypto;
-
-namespace ChainLib.Wallets
+﻿namespace ChainLib.Wallets
 {
+    using ChainLib.Crypto;
+    using System.Collections.Generic;
+    using System.Linq;
+
     public class Wallet
     {
         public string Id { get; internal set; }
@@ -13,29 +13,17 @@ namespace ChainLib.Wallets
 
         internal Wallet() { /* Required for serialization */ }
 
-        public byte[] GetAddressByIndex(int index)
-        {
-            return KeyPairs.SingleOrDefault(x => x.Index == index)?.PublicKey;
-        }
+        public byte[] GetAddressByIndex(int index) => this.KeyPairs.SingleOrDefault(x => x.Index == index)?.PublicKey;
 
-        public byte[] GetAddressByPublicKey(byte[] publicKey)
-        {
-            return KeyPairs.SingleOrDefault(x => x.PublicKey.ConstantTimeEquals(publicKey))?.PublicKey;
-        }
+        public byte[] GetAddressByPublicKey(byte[] publicKey) => this.KeyPairs.SingleOrDefault(x => x.PublicKey.ConstantTimeEquals(publicKey))?.PublicKey;
 
-        public byte[] GetPrivateKeyByAddress(byte[] publicKey)
-        {
-            return KeyPairs.SingleOrDefault(x => x.PublicKey.ConstantTimeEquals(publicKey))?.PrivateKey;
-        }
+        public byte[] GetPrivateKeyByAddress(byte[] publicKey) => this.KeyPairs.SingleOrDefault(x => x.PublicKey.ConstantTimeEquals(publicKey))?.PrivateKey;
 
-        public IEnumerable<byte[]> GetAddresses()
-        {
-            return KeyPairs.Select(x => x.PublicKey);
-        }
+        public IEnumerable<byte[]> GetAddresses() => this.KeyPairs.Select(x => x.PublicKey);
 
-		internal static Wallet FromPassword(string password, string salt = null)
+        internal static Wallet FromPassword(string password, string salt = null)
         {
-            var wallet = new Wallet
+            Wallet wallet = new Wallet
             {
                 Id = CryptoUtil.RandomString(),
                 PasswordHash = PasswordUtil.StorageHash(password, salt)
@@ -45,7 +33,7 @@ namespace ChainLib.Wallets
 
         internal static Wallet FromPasswordHash(string passwordHash)
         {
-            var wallet = new Wallet
+            Wallet wallet = new Wallet
             {
                 Id = CryptoUtil.RandomString(),
                 PasswordHash = passwordHash

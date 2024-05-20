@@ -1,3 +1,5 @@
+namespace ChainLib.WarpWallet.Internal;
+
 #region License
 /*
 CryptSharp
@@ -19,50 +21,47 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 using System;
 
-namespace ChainLib.WarpWallet.Internal
+internal static class Check
 {
-	static class Check
-	{
-		public static void Bounds(string valueName, Array value, int offset, int count)
-		{
-			Check.Null(valueName, value);
+    public static void Bounds(string valueName, Array value, int offset, int count)
+    {
+        Check.Null(valueName, value);
 
-			if (offset < 0 || count < 0 || count > value.Length - offset)
-			{
-				throw Internal.Exceptions.ArgumentOutOfRange(valueName,
-					"Range [{0}, {1}) is outside array bounds [0, {2}).",
-					offset, offset + count, value.Length);
-			}
-		}
+        if (offset < 0 || count < 0 || count > value.Length - offset)
+        {
+            throw Internal.Exceptions.ArgumentOutOfRange(valueName,
+                "Range [{0}, {1}) is outside array bounds [0, {2}).",
+                offset, offset + count, value.Length);
+        }
+    }
 
-		public static void Length(string valueName, Array value, int minimum, int maximum)
-		{
-			Check.Null(valueName, value);
+    public static void Length(string valueName, Array value, int minimum, int maximum)
+    {
+        Check.Null(valueName, value);
 
-			if (value.Length < minimum || value.Length > maximum)
-			{
-				throw Internal.Exceptions.ArgumentOutOfRange(valueName,
-					"Length must be in the range [{0}, {1}].",
-					minimum, maximum);
-			}
-		}
+        if (value.Length < minimum || value.Length > maximum)
+        {
+            throw Internal.Exceptions.ArgumentOutOfRange(valueName,
+                "Length must be in the range [{0}, {1}].",
+                minimum, maximum);
+        }
+    }
 
-		public static void Null<T>(string valueName, T value)
-		{
-			if (value == null)
-			{
-				throw Internal.Exceptions.ArgumentNull(valueName);
-			}
-		}
+    public static void Null<T>(string valueName, T value)
+    {
+        if (value == null)
+        {
+            throw Internal.Exceptions.ArgumentNull(valueName);
+        }
+    }
 
-		public static void Range(string valueName, int value, int minimum, int maximum)
-		{
-			if (value < minimum || value > maximum)
-			{
-				throw Internal.Exceptions.ArgumentOutOfRange(valueName,
-					"Value must be in the range [{0}, {1}].",
-					minimum, maximum);
-			}
-		}
-	}
+    public static void Range(string valueName, int value, int minimum, int maximum)
+    {
+        if (value < minimum || value > maximum)
+        {
+            throw Internal.Exceptions.ArgumentOutOfRange(valueName,
+                "Value must be in the range [{0}, {1}].",
+                minimum, maximum);
+        }
+    }
 }

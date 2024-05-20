@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace ChainLib.Models
+﻿namespace ChainLib.Models
 {
-	[AttributeUsage(AttributeTargets.Property)]
-	public class ComputedAttribute : Attribute { }
+    using System;
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class ComputedAttribute : Attribute { }
 }

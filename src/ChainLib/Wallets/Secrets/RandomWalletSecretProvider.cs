@@ -1,7 +1,7 @@
-using System.Security.Cryptography;
-
 namespace ChainLib.Wallets.Secrets
 {
+    using System.Security.Cryptography;
+
     /// <summary>
     /// Generates a wallet using high-entropy, cryptographically secure random data.
     /// 
@@ -15,17 +15,17 @@ namespace ChainLib.Wallets.Secrets
     {
         private readonly ushort _buffer;
 
-        public RandomWalletSecretProvider(ushort bitsOfEntropy = 256)
-        {
-            _buffer = (ushort) (bitsOfEntropy / 8);
-        }
+        public RandomWalletSecretProvider(ushort bitsOfEntropy = 256) => this._buffer = (ushort)(bitsOfEntropy / 8);
 
         public byte[] GenerateSecret(params object[] args)
-	    {
-			byte[] randomBytes = new byte[_buffer];
-		    using (var rng = RandomNumberGenerator.Create())
-			    rng.GetBytes(randomBytes);
-		    return randomBytes;
-		}
-    }    
+        {
+            byte[] randomBytes = new byte[this._buffer];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
+
+            return randomBytes;
+        }
+    }
 }

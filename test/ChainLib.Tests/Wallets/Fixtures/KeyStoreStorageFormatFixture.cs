@@ -1,15 +1,11 @@
+namespace ChainLib.Tests.Wallets.Fixtures;
+
 using ChainLib.Wallets;
 using ChainLib.Wallets.StorageFormats;
 
-namespace ChainLib.Tests.Wallets.Fixtures
+public class KeyStoreStorageFormatFixture
 {
-	public class KeyStoreStorageFormatFixture
-	{
-		public KeyStoreStorageFormatFixture()
-		{
-			Value = new KeystoreFileStorageFormat();
-		}
+    public KeyStoreStorageFormatFixture() => this.Value = new KeystoreFileStorageFormat();
 
-		public IWalletAddressStorageFormat Value { get; set; }
-	}
+    public IWalletAddressStorageFormat Value { get; set; }
 }

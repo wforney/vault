@@ -1,56 +1,61 @@
-﻿using System.IO;
+﻿namespace ChainLib.Sqlite;
+
 using Microsoft.Extensions.Logging;
+using System.IO;
 
-namespace ChainLib.Sqlite
+public abstract class SqliteRepository
 {
-	public abstract class SqliteRepository
+    private readonly string _baseDirectory;
+    private readonly ILogger _logger;
+
+    private const string DataSubFolder = "Data";
+
+    protected SqliteRepository(string baseDirectory, string subDirectory, string databaseName, ILogger logger)
     {
-	    private readonly string _baseDirectory;
-	    private readonly ILogger _logger;
+        this._baseDirectory = baseDirectory;
+        this._logger = logger;
+        this.CreateIfNotExists(subDirectory, databaseName);
+    }
 
-        private const string DataSubFolder = "Data";
+    protected void CreateIfNotExists(string @namespace, string name)
+    {
+        string dataDirectory = Path.Combine(this._baseDirectory, DataSubFolder);
 
-        protected SqliteRepository(string baseDirectory, string subDirectory, string databaseName, ILogger logger)
+        if (!Directory.Exists(dataDirectory))
         {
-	        _baseDirectory = baseDirectory;
-	        _logger = logger;
-            CreateIfNotExists(subDirectory, databaseName);
+            _ = Directory.CreateDirectory(dataDirectory);
         }
 
-        protected void CreateIfNotExists(string @namespace, string name)
+        if (!Directory.Exists(Path.Combine(dataDirectory, @namespace)))
         {
-            var dataDirectory = Path.Combine(_baseDirectory, DataSubFolder);
-
-            if (!Directory.Exists(dataDirectory))
-                Directory.CreateDirectory(dataDirectory);
-
-            if (!Directory.Exists(Path.Combine(dataDirectory, @namespace)))
-                Directory.CreateDirectory(Path.Combine(dataDirectory, @namespace));
-            
-            DataFile = Path.Combine(dataDirectory, @namespace, $"{name}.db3");
-
-            if (File.Exists(DataFile))
-                return;
-
-            _logger?.LogInformation($"Creating and migrating database at '{DataFile}'");
-            MigrateToLatest();
+            _ = Directory.CreateDirectory(Path.Combine(dataDirectory, @namespace));
         }
 
-        protected string DataFile { get; private set; }
+        this.DataFile = Path.Combine(dataDirectory, @namespace, $"{name}.db3");
 
-	    public abstract void MigrateToLatest();
-
-        public void Purge()
+        if (File.Exists(this.DataFile))
         {
-            _logger?.LogInformation($"Deleting database at '{DataFile}'");
-            File.Delete(DataFile);
+            return;
+        }
 
-            var directoryName = Path.GetDirectoryName(DataFile);
-            if (Directory.GetFiles(directoryName, "*.*", SearchOption.AllDirectories).Length > 0)
-            {
-                _logger?.LogInformation($"Deleting database directory '{directoryName}' as it is no longer in use");
-                Directory.Delete(directoryName, true);
-            }
+        this._logger?.LogInformation($"Creating and migrating database at '{this.DataFile}'");
+        this.MigrateToLatest();
+    }
+
+    protected string DataFile { get; private set; }
+
+    public abstract void MigrateToLatest();
+
+    public void Purge()
+    {
+        this._logger?.LogInformation($"Deleting database at '{this.DataFile}'");
+        File.Delete(this.DataFile);
+
+        string directoryName = Path.GetDirectoryName(this.DataFile);
+        if (Directory.GetFiles(directoryName, "*.*", SearchOption.AllDirectories).Length > 0)
+        {
+            this._logger?.LogInformation($"Deleting database directory '{directoryName}' as it is no longer in use");
+            Directory.Delete(directoryName, true);
         }
     }
 }

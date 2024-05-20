@@ -1,198 +1,202 @@
-﻿using System;
+﻿namespace ChainLib.Node.Models;
+
+using ChainLib.Models;
+using ChainLib.Services;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using ChainLib.Models;
-using ChainLib.Services;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
-namespace ChainLib.Node.Models
+public class Peer
 {
-	public class Peer
-	{
-		private readonly string _host;
-		private readonly int _port;
-		private readonly ICollection<Peer> _peers;
-		private readonly Blockchain _blockchain;
-		private readonly JsonSerializerSettings _jsonSettings;
-		private readonly ILogger<Peer> _logger;
-		private readonly HttpClient _http;
+    private readonly string _host;
+    private readonly int _port;
+    private readonly ICollection<Peer> _peers;
+    private readonly Blockchain _blockchain;
+    private readonly JsonSerializerSettings _jsonSettings;
+    private readonly ILogger<Peer> _logger;
+    private readonly HttpClient _http;
 
-		private string Url => $"http://{_host}:{_port}";
+    private string Url => $"http://{this._host}:{this._port}";
 
-		public IEnumerable<Peer> Peers => _peers;
+    public IEnumerable<Peer> Peers => this._peers;
 
-		public Peer(string host, int port, Blockchain blockchain, JsonSerializerSettings jsonSettings, ILogger<Peer> logger, IEnumerable<string> peers)
-		{
-			_host = host;
-			_port = port;
-			if (peers != null)
-			{
-				_peers = new HashSet<Peer>(peers.Select(x =>
-				{
-					var url = new Uri(x);
-					return new Peer(url.Host, url.Port, blockchain, jsonSettings, logger, null);
-				}));
-			}
-			_blockchain = blockchain;
-			_jsonSettings = jsonSettings;
-			_logger = logger;
+    public Peer(string host, int port, Blockchain blockchain, JsonSerializerSettings jsonSettings, ILogger<Peer> logger, IEnumerable<string> peers)
+    {
+        this._host = host;
+        this._port = port;
+        if (peers != null)
+        {
+            this._peers = new HashSet<Peer>(peers.Select(x =>
+                {
+                    Uri url = new(x);
+                    return new Peer(url.Host, url.Port, blockchain, jsonSettings, logger, null);
+                }));
+        }
 
-			_http = new HttpClient();
-		}
+        this._blockchain = blockchain;
+        this._jsonSettings = jsonSettings;
+        this._logger = logger;
 
-		public async Task ConnectToPeersAsync(params Peer[] newPeers)
-		{
-			foreach (var peer in newPeers)
-			{
-				if (peer.Url == Url)
-					continue;
+        this._http = new HttpClient();
+    }
 
-				// If it already has that peer, ignore.
-				var hasPeer = false;
-				if (_peers.Any(existing => existing.Url == peer.Url))
-				{
-					_logger?.LogInformation($"Peer {peer.Url} not added to connections, because I already have it.");
-					hasPeer = true;
-				}
-				if (hasPeer)
-					continue;
+    public async Task ConnectToPeersAsync(params Peer[] newPeers)
+    {
+        foreach (Peer peer in newPeers)
+        {
+            if (peer.Url == this.Url)
+            {
+                continue;
+            }
 
-				await SendPeerAsync(peer, this);
-				_logger?.LogInformation($"Peer {peer.Url} added to connections.");
-				_peers.Add(peer);
+            // If it already has that peer, ignore.
+            bool hasPeer = false;
+            if (this._peers.Any(existing => existing.Url == peer.Url))
+            {
+                this._logger?.LogInformation($"Peer {peer.Url} not added to connections, because I already have it.");
+                hasPeer = true;
+            }
 
-				await InitConnectionAsync(peer);
-				Broadcast(async node => await SendPeerAsync(peer, node));
-			}
-		}
+            if (hasPeer)
+            {
+                continue;
+            }
 
-		public async Task SendPeerAsync(Peer peer, Peer peerToSend)
-		{
-			var url = $"{peer.Url}/node/peers";
-			_logger.LogInformation($"Sending {peerToSend.Url} to peer {url}.");
+            await this.SendPeerAsync(peer, this);
+            this._logger?.LogInformation($"Peer {peer.Url} added to connections.");
+            this._peers.Add(peer);
 
-			try
-			{
-				var response = await _http.PostAsync(url, null);
-				var json = await response.Content.ReadAsStringAsync();
-				var block = JsonConvert.DeserializeObject<Block>(json, _jsonSettings);
+            await this.InitConnectionAsync(peer);
+            this.Broadcast(async node => await this.SendPeerAsync(peer, node));
+        }
+    }
 
-				await CheckReceivedBlocksAsync(block);
-			}
-			catch (Exception e)
-			{
-				_logger?.LogWarning(e, $"Unable to send me to peer {url}: {e.Message}");
-			}
-		}
+    public async Task SendPeerAsync(Peer peer, Peer peerToSend)
+    {
+        string url = $"{peer.Url}/node/peers";
+        this._logger.LogInformation($"Sending {peerToSend.Url} to peer {url}.");
 
-		public async Task InitConnectionAsync(Peer peer)
-		{
-			await GetLatestBlockAsync(peer);
-		}
+        try
+        {
+            HttpResponseMessage response = await this._http.PostAsync(url, null);
+            string json = await response.Content.ReadAsStringAsync();
+            Block block = JsonConvert.DeserializeObject<Block>(json, this._jsonSettings);
 
-		public async Task GetLatestBlockAsync(Peer peer)
-		{
-			var url = $"{peer.Url}/blockchain/blocks/latest";
-			_logger?.LogInformation($"Getting latest block from: {url}");
+            _ = await this.CheckReceivedBlocksAsync(block);
+        }
+        catch (Exception e)
+        {
+            this._logger?.LogWarning(e, $"Unable to send me to peer {url}: {e.Message}");
+        }
+    }
 
-			try
-			{
-				var response = await _http.GetAsync(url);
-				var json = await response.Content.ReadAsStringAsync();
-				var block = JsonConvert.DeserializeObject<Block>(json, _jsonSettings);
+    public async Task InitConnectionAsync(Peer peer) => await this.GetLatestBlockAsync(peer);
 
-				await CheckReceivedBlocksAsync(block);
-			}
-			catch (Exception e)
-			{
-				_logger?.LogWarning(e, $"Unable to get latest block from {url}: {e.Message}");
-			}
-		}
+    public async Task GetLatestBlockAsync(Peer peer)
+    {
+        string url = $"{peer.Url}/blockchain/blocks/latest";
+        this._logger?.LogInformation($"Getting latest block from: {url}");
 
-		public async Task SendLatestBlockAsync(Peer peer, Block block)
-		{
-			var url = $"{peer.Url}/blockchain/blocks/latest";
-			_logger?.LogInformation($"Sending latest block to: {url}");
+        try
+        {
+            HttpResponseMessage response = await this._http.GetAsync(url);
+            string json = await response.Content.ReadAsStringAsync();
+            Block block = JsonConvert.DeserializeObject<Block>(json, this._jsonSettings);
 
-			try
-			{
-				var body = JsonConvert.SerializeObject(block, _jsonSettings);
-				var response = await _http.PutAsync(url, new StringContent(body, Encoding.UTF8));
-				if (!response.IsSuccessStatusCode)
-					throw new Exception($"Status code was {response.StatusCode}");
-			}
-			catch (Exception e)
-			{
-				_logger?.LogWarning(e, $"Unable to send latest block to {url}: {e.Message}");
-			}
-		}
+            _ = await this.CheckReceivedBlocksAsync(block);
+        }
+        catch (Exception e)
+        {
+            this._logger?.LogWarning(e, $"Unable to get latest block from {url}: {e.Message}");
+        }
+    }
 
-		public async Task GetBlocksAsync(Peer peer)
-		{
-			var url = $"{peer.Url}/blockchain/blocks";
-			_logger?.LogInformation($"Getting blocks from: {url}");
+    public async Task SendLatestBlockAsync(Peer peer, Block block)
+    {
+        string url = $"{peer.Url}/blockchain/blocks/latest";
+        this._logger?.LogInformation($"Sending latest block to: {url}");
 
-			try
-			{
-				var response = await _http.GetAsync(url);
-				var json = await response.Content.ReadAsStringAsync();
-				var block = JsonConvert.DeserializeObject<Block>(json, _jsonSettings);
+        try
+        {
+            string body = JsonConvert.SerializeObject(block, this._jsonSettings);
+            HttpResponseMessage response = await this._http.PutAsync(url, new StringContent(body, Encoding.UTF8));
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Status code was {response.StatusCode}");
+            }
+        }
+        catch (Exception e)
+        {
+            this._logger?.LogWarning(e, $"Unable to send latest block to {url}: {e.Message}");
+        }
+    }
 
-				await CheckReceivedBlocksAsync(block);
-			}
-			catch (Exception e)
-			{
-				_logger?.LogWarning(e, $"Unable to get blocks from {url}: {e.Message}");
-			}
-		}
+    public async Task GetBlocksAsync(Peer peer)
+    {
+        string url = $"{peer.Url}/blockchain/blocks";
+        this._logger?.LogInformation($"Getting blocks from: {url}");
 
-		public void Broadcast(Action<Peer> closure)
-		{
-			foreach (var peer in _peers)
-			{
-				closure(peer);
-			}
-		}
+        try
+        {
+            HttpResponseMessage response = await this._http.GetAsync(url);
+            string json = await response.Content.ReadAsStringAsync();
+            Block block = JsonConvert.DeserializeObject<Block>(json, this._jsonSettings);
 
-		public async Task<bool?> CheckReceivedBlocksAsync(params Block[] blocks)
-		{
-			var receivedBlocks = blocks.OrderBy(x => x.Index).ToList();
-			var latestBlockReceived = receivedBlocks[receivedBlocks.Count - 1];
-			var latestBlockHeld = await _blockchain.GetLastBlockAsync();
+            _ = await this.CheckReceivedBlocksAsync(block);
+        }
+        catch (Exception e)
+        {
+            this._logger?.LogWarning(e, $"Unable to get blocks from {url}: {e.Message}");
+        }
+    }
 
-			// If the received blockchain is not longer than blockchain. Do nothing.
-			if (latestBlockReceived.Index <= latestBlockHeld.Index)
-			{
-				_logger?.LogInformation($"Received blockchain is not longer than blockchain. Do nothing.");
-				return false;
-			}
+    public void Broadcast(Action<Peer> closure)
+    {
+        foreach (Peer peer in this._peers)
+        {
+            closure(peer);
+        }
+    }
 
-			_logger?.LogInformation($"Blockchain possibly behind. We got: {latestBlockHeld.Index}, Peer got: {latestBlockReceived.Index}");
+    public async Task<bool?> CheckReceivedBlocksAsync(params Block[] blocks)
+    {
+        List<Block> receivedBlocks = blocks.OrderBy(x => x.Index).ToList();
+        Block latestBlockReceived = receivedBlocks[^1];
+        Block latestBlockHeld = await this._blockchain.GetLastBlockAsync();
 
-			if (latestBlockHeld.Hash == latestBlockReceived.PreviousHash)
-			{
-				// We can append the received block to our chain
-				_logger?.LogInformation("Appending received block to our chain");
-				await _blockchain.AddBlockAsync(latestBlockReceived);
-				return true;
-			}
+        // If the received blockchain is not longer than blockchain. Do nothing.
+        if (latestBlockReceived.Index <= latestBlockHeld.Index)
+        {
+            this._logger?.LogInformation($"Received blockchain is not longer than blockchain. Do nothing.");
+            return false;
+        }
 
-			if (receivedBlocks.Count == 1)
-			{
-				// We have to query the chain from our peer
-				_logger?.LogInformation("Querying chain from our peers");
-				Broadcast(async node => await GetBlocksAsync(node));
-				return null;
-			}
+        this._logger?.LogInformation($"Blockchain possibly behind. We got: {latestBlockHeld.Index}, Peer got: {latestBlockReceived.Index}");
 
-			// Received blockchain is longer than current blockchain
-			_logger?.LogInformation("Received blockchain is longer than current blockchain");
-			await _blockchain.ReplaceChainAsync(receivedBlocks);
-			return true;
-		}
-	}
+        if (latestBlockHeld.Hash == latestBlockReceived.PreviousHash)
+        {
+            // We can append the received block to our chain
+            this._logger?.LogInformation("Appending received block to our chain");
+            _ = await this._blockchain.AddBlockAsync(latestBlockReceived);
+            return true;
+        }
+
+        if (receivedBlocks.Count == 1)
+        {
+            // We have to query the chain from our peer
+            this._logger?.LogInformation("Querying chain from our peers");
+            this.Broadcast(async node => await this.GetBlocksAsync(node));
+            return null;
+        }
+
+        // Received blockchain is longer than current blockchain
+        this._logger?.LogInformation("Received blockchain is longer than current blockchain");
+        await this._blockchain.ReplaceChainAsync(receivedBlocks);
+        return true;
+    }
 }

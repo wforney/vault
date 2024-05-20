@@ -1,15 +1,11 @@
+namespace ChainLib.Tests.Fixtures;
+
 using ChainLib.Crypto;
 using ChainLib.Models;
 
-namespace ChainLib.Tests.Fixtures
+public class EncryptedBlockObjectTypeProviderFixture
 {
-	public class EncryptedBlockObjectTypeProviderFixture
-	{
-		public EncryptedBlockObjectTypeProviderFixture()
-		{
-			Value = new BlockObjectTypeProvider(CryptoUtil.RandomBytes(32));
-		}
+    public EncryptedBlockObjectTypeProviderFixture() => this.Value = new BlockObjectTypeProvider(CryptoUtil.RandomBytes(32));
 
-		public IBlockObjectTypeProvider Value { get; set; }
-	}
+    public IBlockObjectTypeProvider Value { get; set; }
 }

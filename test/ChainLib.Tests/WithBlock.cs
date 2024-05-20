@@ -1,99 +1,97 @@
-using System;
-using System.Collections.Generic;
+namespace ChainLib.Tests;
+
 using ChainLib.Crypto;
 using ChainLib.Extensions;
 using ChainLib.Models;
 using ChainLib.Models.Extended;
 using ChainLib.Tests.Fixtures;
+using System;
 using Xunit;
 
-namespace ChainLib.Tests
+public class WithBlock :
+        IClassFixture<ObjectHashProviderFixture>,
+        IClassFixture<BlockObjectTypeProviderFixture>
 {
-	public class WithBlock : 
-		IClassFixture<ObjectHashProviderFixture>, 
-		IClassFixture<BlockObjectTypeProviderFixture>
-	{
-		private readonly ObjectHashProviderFixture _hash;
-		private readonly BlockObjectTypeProviderFixture _types;
+    private readonly ObjectHashProviderFixture _hash;
+    private readonly BlockObjectTypeProviderFixture _types;
 
-		public WithBlock(ObjectHashProviderFixture hash, BlockObjectTypeProviderFixture types)
-		{
-			_hash = hash;
-			_types = types;
-		}
+    public WithBlock(ObjectHashProviderFixture hash, BlockObjectTypeProviderFixture types)
+    {
+        this._hash = hash;
+        this._types = types;
+    }
 
-		[Fact]
-		public void Empty_object_collection_is_equivalent_to_null()
-		{
-			var block = new Block
-			{
-				Nonce = 1,
-				PreviousHash = "rosebud".Sha256(),
-				Timestamp = (uint) DateTimeOffset.UtcNow.ToUnixTimeSeconds()
-			};
-			block.MerkleRootHash = block.ComputeMerkleRoot(_hash.Value);
-			block.Hash = block.ToHashBytes(_hash.Value);
-			
-			block.Objects = new List<BlockObject>();
-			Assert.Equal(block.Hash, block.ToHashBytes(_hash.Value));
-		}
+    [Fact]
+    public void Empty_object_collection_is_equivalent_to_null()
+    {
+        Block block = new()
+        {
+            Nonce = 1,
+            PreviousHash = "rosebud".Sha256(),
+            Timestamp = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+        };
+        block.MerkleRootHash = block.ComputeMerkleRoot(this._hash.Value);
+        block.Hash = block.ToHashBytes(this._hash.Value);
 
-		[Fact]
-		public void Consecutive_hashing_is_idempotent()
-		{
-			var block = new Block
-			{
-				Nonce = 1,
-				PreviousHash = "rosebud".Sha256(),
-				Timestamp = (uint) DateTimeOffset.UtcNow.ToUnixTimeSeconds()
-			};
-			block.MerkleRootHash = block.ComputeMerkleRoot(_hash.Value);
-			block.Hash = block.ToHashBytes(_hash.Value);
+        block.Objects = [];
+        Assert.Equal(block.Hash, block.ToHashBytes(this._hash.Value));
+    }
 
-			Assert.Equal(block.Hash, block.ToHashBytes(_hash.Value));
-		}
+    [Fact]
+    public void Consecutive_hashing_is_idempotent()
+    {
+        Block block = new()
+        {
+            Nonce = 1,
+            PreviousHash = "rosebud".Sha256(),
+            Timestamp = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+        };
+        block.MerkleRootHash = block.ComputeMerkleRoot(this._hash.Value);
+        block.Hash = block.ToHashBytes(this._hash.Value);
 
-		[Fact]
-		public void Can_round_trip_with_no_objects()
-		{
-			var block = new Block
-			{
-				Nonce = 1,
-				PreviousHash = "rosebud".Sha256(),
-				Timestamp = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-			};
-			block.MerkleRootHash = block.ComputeMerkleRoot(_hash.Value);
-			block.Hash = block.ToHashBytes(_hash.Value);
+        Assert.Equal(block.Hash, block.ToHashBytes(this._hash.Value));
+    }
 
-			block.RoundTripCheck(_hash.Value, _types.Value);
-		}
+    [Fact]
+    public void Can_round_trip_with_no_objects()
+    {
+        Block block = new()
+        {
+            Nonce = 1,
+            PreviousHash = "rosebud".Sha256(),
+            Timestamp = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        };
+        block.MerkleRootHash = block.ComputeMerkleRoot(this._hash.Value);
+        block.Hash = block.ToHashBytes(this._hash.Value);
 
-		[Fact]
-		public void Can_round_trip_with_transaction_objects()
-		{
-			_types.Value.TryAdd(0, typeof(Transaction));
+        block.RoundTripCheck(this._hash.Value, this._types.Value);
+    }
 
-			var transaction = new Transaction
-			{
-				Id = $"{Guid.NewGuid()}"
-			};
-			var blockObject = new BlockObject
-			{
-				Data = transaction
-			};
-			blockObject.Hash = blockObject.ToHashBytes(_hash.Value);
+    [Fact]
+    public void Can_round_trip_with_transaction_objects()
+    {
+        _ = this._types.Value.TryAdd(0, typeof(Transaction));
 
-			var block = new Block
-			{
-				Nonce = 1,
-				PreviousHash = "rosebud".Sha256(),
-				Timestamp = (uint) DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-				Objects = new List<BlockObject> {blockObject}
-			};
-			block.MerkleRootHash = block.ComputeMerkleRoot(_hash.Value);
-			block.Hash = block.ToHashBytes(_hash.Value);
+        Transaction transaction = new()
+        {
+            Id = $"{Guid.NewGuid()}"
+        };
+        BlockObject blockObject = new()
+        {
+            Data = transaction
+        };
+        blockObject.Hash = blockObject.ToHashBytes(this._hash.Value);
 
-			block.RoundTripCheck(_hash.Value, _types.Value);
-		}
-	}
+        Block block = new()
+        {
+            Nonce = 1,
+            PreviousHash = "rosebud".Sha256(),
+            Timestamp = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            Objects = [blockObject]
+        };
+        block.MerkleRootHash = block.ComputeMerkleRoot(this._hash.Value);
+        block.Hash = block.ToHashBytes(this._hash.Value);
+
+        block.RoundTripCheck(this._hash.Value, this._types.Value);
+    }
 }

@@ -1,59 +1,38 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using ChainLib.Wallets.Addresses;
-using ChainLib.Wallets.Factories;
-using ChainLib.Wallets.Secrets;
-
-namespace ChainLib.Wallets.Providers
+﻿namespace ChainLib.Wallets.Providers
 {
-	public class DeterministicWalletProvider : IWalletProvider
-	{
-		private readonly IWalletRepository _repository;
-		private readonly IWalletSecretProvider _secrets;
-		private readonly IWalletAddressProvider _addresses;
-		private readonly IWalletFactoryProvider _factory;
+    using ChainLib.Wallets.Addresses;
+    using ChainLib.Wallets.Factories;
+    using ChainLib.Wallets.Secrets;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
-		public DeterministicWalletProvider(IWalletRepository repository, ushort bitsOfEntropy = 256)
-		{
-			_repository = repository;
-			_secrets = new RandomWalletSecretProvider(bitsOfEntropy);
-			_addresses = new DeterministicWalletAddressProvider(_secrets);
-			_factory = new SaltedWalletFactoryProvider();
-		}
+    public class DeterministicWalletProvider : IWalletProvider
+    {
+        private readonly IWalletRepository _repository;
+        private readonly IWalletSecretProvider _secrets;
+        private readonly IWalletAddressProvider _addresses;
+        private readonly IWalletFactoryProvider _factory;
 
-		public string GenerateAddress(Wallet wallet)
-		{
-			return _addresses.GenerateAddress(wallet);
-		}
+        public DeterministicWalletProvider(IWalletRepository repository, ushort bitsOfEntropy = 256)
+        {
+            this._repository = repository;
+            this._secrets = new RandomWalletSecretProvider(bitsOfEntropy);
+            this._addresses = new DeterministicWalletAddressProvider(this._secrets);
+            this._factory = new SaltedWalletFactoryProvider();
+        }
 
-		public byte[] GenerateSecret(params object[] args)
-		{
-			return _secrets.GenerateSecret(args);
-		}
+        public string GenerateAddress(Wallet wallet) => this._addresses.GenerateAddress(wallet);
 
-		public Wallet Create(params object[] args)
-		{
-			return _factory.Create(args);
-		}
+        public byte[] GenerateSecret(params object[] args) => this._secrets.GenerateSecret(args);
 
-		public Task<IEnumerable<Wallet>> GetAllAsync()
-		{
-			return _repository.GetAllAsync();
-		}
+        public Wallet Create(params object[] args) => this._factory.Create(args);
 
-		public Task<Wallet> GetByIdAsync(string id)
-		{
-			return _repository.GetByIdAsync(id);
-		}
+        public Task<IEnumerable<Wallet>> GetAllAsync() => this._repository.GetAllAsync();
 
-		public Task<Wallet> AddAsync(Wallet wallet)
-		{
-			return _repository.AddAsync(wallet);
-		}
+        public Task<Wallet> GetByIdAsync(string id) => this._repository.GetByIdAsync(id);
 
-		public Task SaveAddressesAsync(Wallet wallet)
-		{
-			return _repository.SaveAddressesAsync(wallet);
-		}
-	}
+        public Task<Wallet> AddAsync(Wallet wallet) => this._repository.AddAsync(wallet);
+
+        public Task SaveAddressesAsync(Wallet wallet) => this._repository.SaveAddressesAsync(wallet);
+    }
 }

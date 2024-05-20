@@ -1,23 +1,15 @@
-﻿using ChainLib.Serialization;
-
-namespace ChainLib.Models.Extended
+﻿namespace ChainLib.Models.Extended
 {
-	public class Message : IBlockSerialized
-	{
-		public string Text { get; set; }
+    using ChainLib.Serialization;
 
-		public Message(string text)
-		{
-			Text = text; }
+    public class Message : IBlockSerialized
+    {
+        public string Text { get; set; }
 
-		public void Serialize(BlockSerializeContext context)
-		{
-			context.bw.Write(Text);
-		}
+        public Message(string text) => this.Text = text;
 
-		public Message(BlockDeserializeContext context)
-		{
-			Text = context.br.ReadString();
-		}
-	}
+        public void Serialize(BlockSerializeContext context) => context.bw.Write(this.Text);
+
+        public Message(BlockDeserializeContext context) => this.Text = context.br.ReadString();
+    }
 }

@@ -1,10 +1,10 @@
-using System.Linq;
-using System.Text;
-using ChainLib.Crypto;
-
 namespace ChainLib.Wallets.Addresses
 {
-	/// <summary>
+    using ChainLib.Crypto;
+    using System.Linq;
+    using System.Text;
+
+    /// <summary>
     /// Uses Ed25519 to provide a deterministic address for a given wallet.
     /// 
     /// This means that given the same private key, the same addresses will be generated in the same order.
@@ -15,27 +15,26 @@ namespace ChainLib.Wallets.Addresses
     {
         private readonly IWalletSecretProvider _secrets;
 
-        public DeterministicWalletAddressProvider(IWalletSecretProvider secrets)
-        {
-            _secrets = secrets;
-        }
+        public DeterministicWalletAddressProvider(IWalletSecretProvider secrets) => this._secrets = secrets;
 
         public string GenerateAddress(Wallet wallet)
         {
-	        if (wallet.Secret == null || wallet.Secret.Length == 0)
-		        wallet.Secret = _secrets.GenerateSecret(wallet);
+            if (wallet.Secret == null || wallet.Secret.Length == 0)
+            {
+                wallet.Secret = this._secrets.GenerateSecret(wallet);
+            }
 
             // Generate next seed based on the first secret or a new secret from the last key pair
-            var lastKeyPair = wallet.KeyPairs.LastOrDefault();
-	        var seed = lastKeyPair == null
-		        ? wallet.Secret
-		        : PasswordUtil.FastHash(
-			        Encoding.UTF8.GetString(lastKeyPair.PrivateKey),
-			        Constants.DefaultFixedSalt16);
+            KeyPair lastKeyPair = wallet.KeyPairs.LastOrDefault();
+            byte[] seed = lastKeyPair == null
+                ? wallet.Secret
+                : PasswordUtil.FastHash(
+                    Encoding.UTF8.GetString(lastKeyPair.PrivateKey),
+                    Constants.DefaultFixedSalt16);
 
-            var keyPair = Ed25519.GenerateKeyPairFromSecret(seed);
+            System.Tuple<byte[], byte[]> keyPair = Ed25519.GenerateKeyPairFromSecret(seed);
 
-            var newKeyPair = new KeyPair(
+            KeyPair newKeyPair = new KeyPair(
                 wallet.KeyPairs.Count + 1,
                 keyPair.Item1,
                 keyPair.Item2

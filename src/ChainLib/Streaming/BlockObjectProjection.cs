@@ -1,32 +1,36 @@
-﻿using System.Collections.Generic;
-using ChainLib.Models;
-
-namespace ChainLib.Streaming
+﻿namespace ChainLib.Streaming
 {
-	public class BlockObjectProjection
+    using ChainLib.Models;
+    using System.Collections.Generic;
+
+    public class BlockObjectProjection
     {
-	    private readonly IBlockStore _source;
-	    private readonly IBlockObjectTypeProvider _typeProvider;
+        private readonly IBlockStore _source;
+        private readonly IBlockObjectTypeProvider _typeProvider;
 
-	    public BlockObjectProjection(IBlockStore source, IBlockObjectTypeProvider typeProvider)
-	    {
-		    _source = source;
-		    _typeProvider = typeProvider;
-	    }
+        public BlockObjectProjection(IBlockStore source, IBlockObjectTypeProvider typeProvider)
+        {
+            this._source = source;
+            this._typeProvider = typeProvider;
+        }
 
-	    public IEnumerable<T> Stream<T>(bool forwards = true, int startingAt = 0) where T : IBlockSerialized
-	    {
-			var type = _typeProvider.Get(typeof(T));
-			if(!type.HasValue)
-				yield break;
+        public IEnumerable<T> Stream<T>(bool forwards = true, int startingAt = 0) where T : IBlockSerialized
+        {
+            long? type = this._typeProvider.Get(typeof(T));
+            if (!type.HasValue)
+            {
+                yield break;
+            }
 
-		    foreach (var item in _source.StreamAllBlockObjects(forwards, startingAt))
-		    {
-			    if (!item.Type.HasValue || item.Type != type)
-				    continue;
+            foreach (BlockObject item in this._source.StreamAllBlockObjects(forwards, startingAt))
+            {
+                if (!item.Type.HasValue || item.Type != type)
+                {
+                    continue;
+                }
 
-			    yield return (T) item.Data;
-		    }
-		}
+                yield return (T)item.Data;
+            }
+        }
     }
 }

@@ -1,31 +1,34 @@
-﻿using System;
-using System.IO;
-using ChainLib.Models;
-
-namespace ChainLib.Serialization
+﻿namespace ChainLib.Serialization
 {
-	public partial class BlockSerializeContext
-	{
-		public BlockSerializeContext(BinaryWriter bw, IBlockObjectTypeProvider typeProvider, int version = formatVersion)
-		{
-			this.bw = bw;
-			this.typeProvider = typeProvider;
-			if (Version > formatVersion)
-				throw new Exception("Tried to save block with a version that is too new");
-			Version = version;
+    using ChainLib.Models;
+    using System;
+    using System.IO;
 
-			bw.Write(Version);
-		}
+    public partial class BlockSerializeContext
+    {
+        public BlockSerializeContext(BinaryWriter bw, IBlockObjectTypeProvider typeProvider, int version = formatVersion)
+        {
+            this.bw = bw;
+            this.typeProvider = typeProvider;
+            if (this.Version > formatVersion)
+            {
+                throw new Exception("Tried to save block with a version that is too new");
+            }
 
-		public readonly BinaryWriter bw;
-		public readonly IBlockObjectTypeProvider typeProvider;
+            this.Version = version;
 
-		#region Version
+            bw.Write(this.Version);
+        }
 
-		public const int formatVersion = 1;
+        public readonly BinaryWriter bw;
+        public readonly IBlockObjectTypeProvider typeProvider;
 
-		public int Version { get; private set; }
+        #region Version
 
-		#endregion
-	}
+        public const int formatVersion = 1;
+
+        public int Version { get; private set; }
+
+        #endregion
+    }
 }

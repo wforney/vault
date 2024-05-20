@@ -1,3 +1,5 @@
+namespace ChainLib.Tests.Wallets;
+
 using ChainLib.Crypto;
 using ChainLib.Tests.Wallets.Fixtures;
 using ChainLib.Wallets;
@@ -5,85 +7,82 @@ using ChainLib.Wallets.Factories;
 using ChainLib.Wallets.StorageFormats;
 using Xunit;
 
-namespace ChainLib.Tests.Wallets
+public class WhenWalletIsCreatedWithTwoAddresses :
+        IClassFixture<WalletWithTwoAddressesFixture>,
+        IClassFixture<WifAddressStorageFormatFixture>,
+        IClassFixture<KeyStoreStorageFormatFixture>
 {
-	public class WhenWalletIsCreatedWithTwoAddresses :
-		IClassFixture<WalletWithTwoAddressesFixture>,
-		IClassFixture<WifAddressStorageFormatFixture>,
-		IClassFixture<KeyStoreStorageFormatFixture>
-	{
-		private readonly WifAddressStorageFormatFixture _wif;
-		private readonly KeyStoreStorageFormatFixture _keystore;
+    private readonly WifAddressStorageFormatFixture _wif;
+    private readonly KeyStoreStorageFormatFixture _keystore;
 
-		public WhenWalletIsCreatedWithTwoAddresses(
-			WalletWithTwoAddressesFixture fixture,
-			WifAddressStorageFormatFixture wif, 
-			KeyStoreStorageFormatFixture keystore)
-		{
-			_wif = wif;
+    public WhenWalletIsCreatedWithTwoAddresses(
+        WalletWithTwoAddressesFixture fixture,
+        WifAddressStorageFormatFixture wif,
+        KeyStoreStorageFormatFixture keystore)
+    {
+        this._wif = wif;
 
-			_keystore = keystore;
-			Fixture = fixture;
-		}
-		
-		public WalletWithTwoAddressesFixture Fixture { get; set; }
+        this._keystore = keystore;
+        this.Fixture = fixture;
+    }
 
-		[Fact]
-		public void There_are_two_keypairs_in_the_wallet()
-		{
-			Assert.NotNull(Fixture.Value);
-			Assert.Equal(2, Fixture.Value.KeyPairs.Count);
-		}
+    public WalletWithTwoAddressesFixture Fixture { get; set; }
 
-		[Fact]
-		public void Both_addresses_can_be_exported_via_WIF()
-		{
-			var wallet1 = Fixture.Value;
-			var wif1 = _wif.Value.Export(wallet1, wallet1.KeyPairs[0].PublicKey);
-			var wif2 = _wif.Value.Export(wallet1, wallet1.KeyPairs[1].PublicKey);
+    [Fact]
+    public void There_are_two_keypairs_in_the_wallet()
+    {
+        Assert.NotNull(this.Fixture.Value);
+        Assert.Equal(2, this.Fixture.Value.KeyPairs.Count);
+    }
 
-			Assert.Equal(wallet1.KeyPairs[0].PrivateKey.ToHex(), WifAddressStorageFormat.GetPrivateKeyFromImport(wif1, Constants.WifKeyLength).ToHex());
-			Assert.Equal(wallet1.KeyPairs[1].PrivateKey.ToHex(), WifAddressStorageFormat.GetPrivateKeyFromImport(wif2, Constants.WifKeyLength).ToHex());
-		}
+    [Fact]
+    public void Both_addresses_can_be_exported_via_WIF()
+    {
+        Wallet wallet1 = this.Fixture.Value;
+        string wif1 = this._wif.Value.Export(wallet1, wallet1.KeyPairs[0].PublicKey);
+        string wif2 = this._wif.Value.Export(wallet1, wallet1.KeyPairs[1].PublicKey);
 
-		[Fact]
-		public void Both_addresses_can_be_imported_via_WIF()
-		{
-			var wallet1 = Fixture.Value;
-			var wif1 = _wif.Value.Export(wallet1, wallet1.KeyPairs[0].PublicKey);
-			var wif2 = _wif.Value.Export(wallet1, wallet1.KeyPairs[1].PublicKey);
+        Assert.Equal(wallet1.KeyPairs[0].PrivateKey.ToHex(), WifAddressStorageFormat.GetPrivateKeyFromImport(wif1, Constants.WifKeyLength).ToHex());
+        Assert.Equal(wallet1.KeyPairs[1].PrivateKey.ToHex(), WifAddressStorageFormat.GetPrivateKeyFromImport(wif2, Constants.WifKeyLength).ToHex());
+    }
 
-			var factory = new FixedSaltWalletFactoryProvider(Constants.DefaultFixedSalt16);
-			var wallet2 = factory.Create("rosebud");
-			_wif.Value.Import(wallet2, wif1, Constants.WifKeyLength); 
-			_wif.Value.Import(wallet2, wif2, Constants.WifKeyLength);
+    [Fact]
+    public void Both_addresses_can_be_imported_via_WIF()
+    {
+        Wallet wallet1 = this.Fixture.Value;
+        string wif1 = this._wif.Value.Export(wallet1, wallet1.KeyPairs[0].PublicKey);
+        string wif2 = this._wif.Value.Export(wallet1, wallet1.KeyPairs[1].PublicKey);
 
-			Assert.Equal(wallet1.KeyPairs.Count, wallet2.KeyPairs.Count);
-			Assert.Equal(wallet1.KeyPairs[0].PublicKey.ToHex(), wallet2.KeyPairs[0].PublicKey.ToHex());
-			Assert.Equal(wallet1.KeyPairs[0].PrivateKey.ToHex(), wallet2.KeyPairs[0].PrivateKey.ToHex());
-			Assert.Equal(wallet1.KeyPairs[1].PublicKey.ToHex(), wallet2.KeyPairs[1].PublicKey.ToHex());
-			Assert.Equal(wallet1.KeyPairs[1].PrivateKey.ToHex(), wallet2.KeyPairs[1].PrivateKey.ToHex());
-		}
+        FixedSaltWalletFactoryProvider factory = new(Constants.DefaultFixedSalt16);
+        Wallet wallet2 = factory.Create("rosebud");
+        _ = this._wif.Value.Import(wallet2, wif1, Constants.WifKeyLength);
+        _ = this._wif.Value.Import(wallet2, wif2, Constants.WifKeyLength);
 
-		[Fact]
-		public void Both_addresses_can_be_imported_and_exported_via_keystore()
-		{
-			var wallet1 = Fixture.Value;
-			var kstore1 = _keystore.Value.Export(wallet1, wallet1.KeyPairs[0].PublicKey);
-			var kstore2 = _keystore.Value.Export(wallet1, wallet1.KeyPairs[1].PublicKey);
-			Assert.NotNull(kstore1);
-			Assert.NotNull(kstore2);
-			
-			var factory = new FixedSaltWalletFactoryProvider(Constants.DefaultFixedSalt16);
-			var wallet2 = factory.Create("rosebud");
-			_keystore.Value.Import(wallet2, kstore1, Constants.KeystoreKeyLength);
-			_keystore.Value.Import(wallet2, kstore2, Constants.KeystoreKeyLength);
+        Assert.Equal(wallet1.KeyPairs.Count, wallet2.KeyPairs.Count);
+        Assert.Equal(wallet1.KeyPairs[0].PublicKey.ToHex(), wallet2.KeyPairs[0].PublicKey.ToHex());
+        Assert.Equal(wallet1.KeyPairs[0].PrivateKey.ToHex(), wallet2.KeyPairs[0].PrivateKey.ToHex());
+        Assert.Equal(wallet1.KeyPairs[1].PublicKey.ToHex(), wallet2.KeyPairs[1].PublicKey.ToHex());
+        Assert.Equal(wallet1.KeyPairs[1].PrivateKey.ToHex(), wallet2.KeyPairs[1].PrivateKey.ToHex());
+    }
 
-			Assert.Equal(wallet1.KeyPairs.Count, wallet2.KeyPairs.Count);
-			Assert.Equal(wallet1.KeyPairs[0].PublicKey.ToHex(), wallet2.KeyPairs[0].PublicKey.ToHex());
-			Assert.Equal(wallet1.KeyPairs[0].PrivateKey.ToHex(), wallet2.KeyPairs[0].PrivateKey.ToHex());
-			Assert.Equal(wallet1.KeyPairs[1].PublicKey.ToHex(), wallet2.KeyPairs[1].PublicKey.ToHex());
-			Assert.Equal(wallet1.KeyPairs[1].PrivateKey.ToHex(), wallet2.KeyPairs[1].PrivateKey.ToHex());
-		}
-	}
+    [Fact]
+    public void Both_addresses_can_be_imported_and_exported_via_keystore()
+    {
+        Wallet wallet1 = this.Fixture.Value;
+        string kstore1 = this._keystore.Value.Export(wallet1, wallet1.KeyPairs[0].PublicKey);
+        string kstore2 = this._keystore.Value.Export(wallet1, wallet1.KeyPairs[1].PublicKey);
+        Assert.NotNull(kstore1);
+        Assert.NotNull(kstore2);
+
+        FixedSaltWalletFactoryProvider factory = new(Constants.DefaultFixedSalt16);
+        Wallet wallet2 = factory.Create("rosebud");
+        _ = this._keystore.Value.Import(wallet2, kstore1, Constants.KeystoreKeyLength);
+        _ = this._keystore.Value.Import(wallet2, kstore2, Constants.KeystoreKeyLength);
+
+        Assert.Equal(wallet1.KeyPairs.Count, wallet2.KeyPairs.Count);
+        Assert.Equal(wallet1.KeyPairs[0].PublicKey.ToHex(), wallet2.KeyPairs[0].PublicKey.ToHex());
+        Assert.Equal(wallet1.KeyPairs[0].PrivateKey.ToHex(), wallet2.KeyPairs[0].PrivateKey.ToHex());
+        Assert.Equal(wallet1.KeyPairs[1].PublicKey.ToHex(), wallet2.KeyPairs[1].PublicKey.ToHex());
+        Assert.Equal(wallet1.KeyPairs[1].PrivateKey.ToHex(), wallet2.KeyPairs[1].PrivateKey.ToHex());
+    }
 }

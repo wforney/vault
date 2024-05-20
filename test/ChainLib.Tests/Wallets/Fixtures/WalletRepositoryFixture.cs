@@ -1,29 +1,28 @@
-using System;
+namespace ChainLib.Tests.Wallets.Fixtures;
+
 using ChainLib.Sqlite;
 using ChainLib.Wallets.Addresses;
 using ChainLib.Wallets.Secrets;
 using Microsoft.Extensions.Logging;
+using System;
 
-namespace ChainLib.Tests.Wallets.Fixtures
+public class WalletRepositoryFixture
 {
-	public class WalletRepositoryFixture
-	{
-		public WalletRepositoryFixture()
-		{
-			var secrets = new PasswordHashSecretProvider();
-			var addresses = new DeterministicWalletAddressProvider(secrets);
+    public WalletRepositoryFixture()
+    {
+        PasswordHashSecretProvider secrets = new();
+        _ = new DeterministicWalletAddressProvider(secrets);
 
-			var factory = new LoggerFactory();
+        LoggerFactory factory = new();
 
-			var baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        string baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-			Value = new SqliteWalletRepository(
-				baseDirectory,
-				$"{Guid.NewGuid()}",
-				"wallets",
-				factory.CreateLogger<SqliteWalletRepository>());
-		}
+        this.Value = new SqliteWalletRepository(
+                baseDirectory,
+                $"{Guid.NewGuid()}",
+                "wallets",
+                factory.CreateLogger<SqliteWalletRepository>());
+    }
 
-		public SqliteWalletRepository Value { get; set; }
-	}
+    public SqliteWalletRepository Value { get; set; }
 }

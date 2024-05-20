@@ -1,84 +1,78 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-
-namespace ChainLib.Serialization
+﻿namespace ChainLib.Serialization
 {
-	internal class MemoryCompareStream : Stream
-	{
-		public MemoryCompareStream(byte[] compareTo)
-		{
-			this.compareTo = compareTo;
-			this.position = 0;
-		}
+    using System;
+    using System.Diagnostics;
+    using System.IO;
 
-		byte[] compareTo;
-		long position;
+    internal class MemoryCompareStream : Stream
+    {
+        public MemoryCompareStream(byte[] compareTo)
+        {
+            this.compareTo = compareTo;
+            this.position = 0;
+        }
 
-		public override void Write(byte[] buffer, int offset, int count)
-		{
-			for (int i = 0; i < count; i++)
-			{
-				if (buffer[offset + i] != compareTo[position + i])
-				{
+        private readonly byte[] compareTo;
+        private long position;
 
-					Debug.Assert(false);
-					throw new Exception("Data mismatch");
-				}
-			}
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (buffer[offset + i] != this.compareTo[this.position + i])
+                {
 
-			position += count;
-		}
+                    Debug.Assert(false);
+                    throw new Exception("Data mismatch");
+                }
+            }
 
-		public override void WriteByte(byte value)
-		{
-			if (compareTo[position] != value)
-			{
-				Debug.Assert(false);
-				throw new Exception("Data mismatch");
-			}
+            this.position += count;
+        }
 
-			position++;
-		}
+        public override void WriteByte(byte value)
+        {
+            if (this.compareTo[this.position] != value)
+            {
+                Debug.Assert(false);
+                throw new Exception("Data mismatch");
+            }
 
+            this.position++;
+        }
 
-		#region Boring Stream Stuff
+        #region Boring Stream Stuff
 
-		public override bool CanRead { get { return false; } }
-		public override bool CanSeek { get { return true; } }
-		public override bool CanWrite { get { return true; } }
-		public override void Flush() { }
-		public override long Length { get { return compareTo.Length; } }
-		public override long Position { get { return position; } set { position = value; } }
+        public override bool CanRead => false;
+        public override bool CanSeek => true;
+        public override bool CanWrite => true;
+        public override void Flush() { }
+        public override long Length => this.compareTo.Length;
+        public override long Position { get => this.position; set => this.position = value; }
 
-		public override int Read(byte[] buffer, int offset, int count)
-		{
-			throw new InvalidOperationException();
-		}
+        public override int Read(byte[] buffer, int offset, int count) => throw new InvalidOperationException();
 
-		public override long Seek(long offset, SeekOrigin origin)
-		{
-			switch (origin)
-			{
-				case SeekOrigin.Begin:
-					position = offset;
-					break;
-				case SeekOrigin.Current:
-					position += offset;
-					break;
-				case SeekOrigin.End:
-					position = compareTo.Length - offset;
-					break;
-			}
-			return Position;
-		}
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            switch (origin)
+            {
+                case SeekOrigin.Begin:
+                    this.position = offset;
+                    break;
+                case SeekOrigin.Current:
+                    this.position += offset;
+                    break;
+                case SeekOrigin.End:
+                    this.position = this.compareTo.Length - offset;
+                    break;
+            }
 
-		public override void SetLength(long value)
-		{
-			throw new InvalidOperationException();
-		}
+            return this.Position;
+        }
 
-		#endregion
+        public override void SetLength(long value) => throw new InvalidOperationException();
 
-	}
+        #endregion
+
+    }
 }

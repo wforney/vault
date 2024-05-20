@@ -1,3 +1,5 @@
+namespace ChainLib.WarpWallet.Internal;
+
 #region License
 /*
 CryptSharp
@@ -19,47 +21,41 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 using System;
 
-namespace ChainLib.WarpWallet.Internal
+internal static class Exceptions
 {
-	static class Exceptions
-	{
-		public static ArgumentException Argument
-			(string valueName, string message, params object[] args)
-		{
-			message = string.Format(message, args);
-			ArgumentException e = valueName == null
-				? new ArgumentException(message)
-				: new ArgumentException(message, valueName);
-			return e;
-		}
+    public static ArgumentException Argument
+        (string valueName, string message, params object[] args)
+    {
+        message = string.Format(message, args);
+        ArgumentException e = valueName == null
+            ? new ArgumentException(message)
+            : new ArgumentException(message, valueName);
+        return e;
+    }
 
-		public static ArgumentNullException ArgumentNull(string valueName)
-		{
-			ArgumentNullException e = valueName == null
-				? new ArgumentNullException()
-				: new ArgumentNullException(valueName);
-			return e;
-		}
+    public static ArgumentNullException ArgumentNull(string valueName)
+    {
+        ArgumentNullException e = valueName == null
+            ? new ArgumentNullException()
+            : new ArgumentNullException(valueName);
+        return e;
+    }
 
-		public static ArgumentOutOfRangeException ArgumentOutOfRange
-			(string valueName, string message, params object[] args)
-		{
-			message = string.Format(message, args);
-			ArgumentOutOfRangeException e = valueName == null
-				? new ArgumentOutOfRangeException(message, (Exception)null)
-				: new ArgumentOutOfRangeException(valueName, message);
-			return e;
-		}
+    public static ArgumentOutOfRangeException ArgumentOutOfRange
+        (string valueName, string message, params object[] args)
+    {
+        message = string.Format(message, args);
+        ArgumentOutOfRangeException e = valueName == null
+            ? new ArgumentOutOfRangeException(message, (Exception)null)
+            : new ArgumentOutOfRangeException(valueName, message);
+        return e;
+    }
 
-		public static InvalidOperationException InvalidOperation()
-		{
-			InvalidOperationException e = new InvalidOperationException();
-			return e;
-		}
+    public static InvalidOperationException InvalidOperation()
+    {
+        InvalidOperationException e = new();
+        return e;
+    }
 
-		public static NotSupportedException NotSupported()
-		{
-			return new NotSupportedException();
-		}
-	}
+    public static NotSupportedException NotSupported() => new();
 }

@@ -1,13 +1,12 @@
+namespace ChainLib.Tests.Fixtures;
+
 using System;
 
-namespace ChainLib.Tests.Fixtures
+public class EncryptedEmptyBlockRepositoryFixture : EmptyBlockRepositoryFixture
 {
-	public class EncryptedEmptyBlockRepositoryFixture : EmptyBlockRepositoryFixture
-	{
-		public EncryptedEmptyBlockRepositoryFixture() : base(
-			$"{Guid.NewGuid()}",
-			new ObjectHashProviderFixture().Value,
-			new EncryptedBlockObjectTypeProviderFixture().Value)
-		{ }
-	}
+    public EncryptedEmptyBlockRepositoryFixture() : base(
+        $"{Guid.NewGuid()}",
+        new ObjectHashProviderFixture().Value,
+        new EncryptedBlockObjectTypeProviderFixture().Value)
+    { }
 }

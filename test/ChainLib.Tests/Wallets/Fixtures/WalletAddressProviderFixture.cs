@@ -1,17 +1,16 @@
+namespace ChainLib.Tests.Wallets.Fixtures;
+
 using ChainLib.Wallets;
 using ChainLib.Wallets.Addresses;
 
-namespace ChainLib.Tests.Wallets.Fixtures
+public class WalletAddressProviderFixture
 {
-    public class WalletAddressProviderFixture
+    public WalletAddressProviderFixture()
     {
-        public WalletAddressProviderFixture()
-        {
-            var secrets = new WalletSecretProviderFixture();
+        WalletSecretProviderFixture secrets = new();
 
-            Value = new DeterministicWalletAddressProvider(secrets.Value);
-        }
-
-        public IWalletAddressProvider Value { get; set; }
+        this.Value = new DeterministicWalletAddressProvider(secrets.Value);
     }
+
+    public IWalletAddressProvider Value { get; set; }
 }

@@ -1,15 +1,10 @@
-using System.Text;
+namespace ChainLib.Tests.Fixtures;
+
 using ChainLib.Models;
 
-namespace ChainLib.Tests.Fixtures
+public class BlockObjectTypeProviderFixture
 {
-	public class BlockObjectTypeProviderFixture
-	{
-		public BlockObjectTypeProviderFixture()
-		{
-			Value = new BlockObjectTypeProvider();
-		}
+    public BlockObjectTypeProviderFixture() => this.Value = new BlockObjectTypeProvider();
 
-		public IBlockObjectTypeProvider Value { get; set; }
-	}
+    public IBlockObjectTypeProvider Value { get; set; }
 }

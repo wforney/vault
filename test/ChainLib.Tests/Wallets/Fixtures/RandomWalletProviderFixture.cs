@@ -1,17 +1,16 @@
+namespace ChainLib.Tests.Wallets.Fixtures;
+
 using ChainLib.Wallets;
 using ChainLib.Wallets.Providers;
 
-namespace ChainLib.Tests.Wallets.Fixtures
+public class RandomWalletProviderFixture
 {
-    public class RandomWalletProviderFixture
+    public RandomWalletProviderFixture()
     {
-        public RandomWalletProviderFixture()
-        {
-			var repository = new WalletRepositoryFixture();
+        WalletRepositoryFixture repository = new();
 
-            Value = new RandomWalletProvider(repository.Value);
-        }
-
-        public IWalletProvider Value { get; set; }
+        this.Value = new RandomWalletProvider(repository.Value);
     }
+
+    public IWalletProvider Value { get; set; }
 }

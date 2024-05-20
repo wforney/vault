@@ -1,22 +1,21 @@
+namespace ChainLib.Tests.Wallets.Fixtures;
+
 using ChainLib.Wallets;
 using ChainLib.Wallets.Factories;
 
-namespace ChainLib.Tests.Wallets.Fixtures
+public class WalletWithTwoAddressesFixture
 {
-    public class WalletWithTwoAddressesFixture
+    public WalletWithTwoAddressesFixture()
     {
-        public WalletWithTwoAddressesFixture()
-        {
-            var factory = new FixedSaltWalletFactoryProvider(Constants.DefaultFixedSalt16);
-            var provider = new WalletAddressProviderFixture();
-            var wallet = factory.Create("rosebud");
+        FixedSaltWalletFactoryProvider factory = new(Constants.DefaultFixedSalt16);
+        WalletAddressProviderFixture provider = new();
+        Wallet wallet = factory.Create("rosebud");
 
-            provider.Value.GenerateAddress(wallet);
-            provider.Value.GenerateAddress(wallet);
+        _ = provider.Value.GenerateAddress(wallet);
+        _ = provider.Value.GenerateAddress(wallet);
 
-            Value = wallet;
-        }
-
-        public Wallet Value { get; set; }
+        this.Value = wallet;
     }
+
+    public Wallet Value { get; set; }
 }

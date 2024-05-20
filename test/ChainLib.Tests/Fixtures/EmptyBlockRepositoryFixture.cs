@@ -1,62 +1,59 @@
-using System;
-using Microsoft.Extensions.Logging;
+namespace ChainLib.Tests.Fixtures;
+
 using ChainLib.Extensions;
 using ChainLib.Models;
 using ChainLib.Sqlite;
+using Microsoft.Extensions.Logging;
+using System;
 
-namespace ChainLib.Tests.Fixtures
+public class EmptyBlockRepositoryFixture : IDisposable
 {
-	public class EmptyBlockRepositoryFixture : IDisposable
-	{
-		public EmptyBlockRepositoryFixture() : this(
-			$"{Guid.NewGuid()}", 
-			new ObjectHashProviderFixture().Value, 
-			new BlockObjectTypeProviderFixture().Value) { }
+    public EmptyBlockRepositoryFixture() : this(
+        $"{Guid.NewGuid()}",
+        new ObjectHashProviderFixture().Value,
+        new BlockObjectTypeProviderFixture().Value)
+    { }
 
-		protected EmptyBlockRepositoryFixture(string subDirectory, IHashProvider hashProvider, IBlockObjectTypeProvider typeProvider)
-		{
-			var factory = new LoggerFactory();
-			
-			var genesisBlock = new Block
-			{
-				Index = 0L,
-				PreviousHash = new byte[] {0},
-				MerkleRootHash = new byte[] {0},
-				Timestamp = 1465154705U,
-				Nonce = 0L,
-				Objects = new BlockObject[] { },
-			};
+    protected EmptyBlockRepositoryFixture(string subDirectory, IHashProvider hashProvider, IBlockObjectTypeProvider typeProvider)
+    {
+        LoggerFactory factory = new();
 
-			var baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        Block genesisBlock = new()
+        {
+            Index = 0L,
+            PreviousHash = new byte[] { 0 },
+            MerkleRootHash = new byte[] { 0 },
+            Timestamp = 1465154705U,
+            Nonce = 0L,
+            Objects = new BlockObject[] { },
+        };
 
-			Value = new SqliteBlockStore(
-				baseDirectory,
-				subDirectory,
-				"blockchain",
-				genesisBlock,
-				typeProvider,
-				factory.CreateLogger<SqliteBlockStore>());
+        string baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-			genesisBlock.Index = 1;
+        this.Value = new SqliteBlockStore(
+                baseDirectory,
+                subDirectory,
+                "blockchain",
+                genesisBlock,
+                typeProvider,
+                factory.CreateLogger<SqliteBlockStore>());
 
-			genesisBlock.Hash = genesisBlock.ToHashBytes(hashProvider);
+        genesisBlock.Index = 1;
 
-			Value.AddAsync(genesisBlock).ConfigureAwait(false).GetAwaiter().GetResult();
-			
-			GenesisBlock = genesisBlock;
+        genesisBlock.Hash = genesisBlock.ToHashBytes(hashProvider);
 
-			TypeProvider = typeProvider;
-		}
+        this.Value.AddAsync(genesisBlock).ConfigureAwait(false).GetAwaiter().GetResult();
 
-		public SqliteBlockStore Value { get; set; }
+        this.GenesisBlock = genesisBlock;
 
-		public Block GenesisBlock { get; }
+        this.TypeProvider = typeProvider;
+    }
 
-		public IBlockObjectTypeProvider TypeProvider { get; }
+    public SqliteBlockStore Value { get; set; }
 
-		public void Dispose()
-		{
-			Value.Purge();
-		}
-	}
+    public Block GenesisBlock { get; }
+
+    public IBlockObjectTypeProvider TypeProvider { get; }
+
+    public void Dispose() => this.Value.Purge();
 }

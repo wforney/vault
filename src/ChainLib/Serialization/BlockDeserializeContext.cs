@@ -1,25 +1,27 @@
-using System;
-using System.IO;
-using ChainLib.Models;
-
 namespace ChainLib.Serialization
 {
-	public class BlockDeserializeContext
-	{
-		public BlockDeserializeContext(BinaryReader br, IBlockObjectTypeProvider typeProvider)
-		{
-			this.br = br;
-			this.typeProvider = typeProvider;
+    using ChainLib.Models;
+    using System;
+    using System.IO;
 
-			Version = br.ReadInt32();
+    public class BlockDeserializeContext
+    {
+        public BlockDeserializeContext(BinaryReader br, IBlockObjectTypeProvider typeProvider)
+        {
+            this.br = br;
+            this.typeProvider = typeProvider;
 
-			if (Version > BlockSerializeContext.formatVersion)
-				throw new Exception("Tried to load block with a version that is too new");
-		}
+            this.Version = br.ReadInt32();
 
-		public readonly BinaryReader br;
-		public readonly IBlockObjectTypeProvider typeProvider;
+            if (this.Version > BlockSerializeContext.formatVersion)
+            {
+                throw new Exception("Tried to load block with a version that is too new");
+            }
+        }
 
-		public int Version { get; }
-	}
+        public readonly BinaryReader br;
+        public readonly IBlockObjectTypeProvider typeProvider;
+
+        public int Version { get; }
+    }
 }
