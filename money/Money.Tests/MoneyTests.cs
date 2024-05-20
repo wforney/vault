@@ -16,7 +16,7 @@ public class MoneyTests
         const double right = 20.00;
 
         Money total = left + right;
-        Assert.AreEqual(30.00, (double)total);
+        Assert.That((double)total, Is.EqualTo(30.00));
     }
 
     [Test]
@@ -24,7 +24,7 @@ public class MoneyTests
     {
         Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         Money money = 10.00;
-        Assert.AreEqual(10.00, (double)money);
+        Assert.That((double)money, Is.EqualTo(10.00));
     }
 
     [Test]
@@ -32,7 +32,7 @@ public class MoneyTests
     {
         Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         Money money = 1000;
-        Assert.AreEqual(1000.00, (double)money);
+        Assert.That((double)money, Is.EqualTo(1000.00));
     }
 
     [Test]
@@ -53,7 +53,7 @@ public class MoneyTests
     {
         Thread.CurrentThread.CurrentCulture = new CultureInfo(cultureName);
         Money money = 1000;
-        Assert.AreEqual(currency, money.CurrencyInfo.Code);
+        Assert.That(money.CurrencyInfo.Code, Is.EqualTo(currency));
 
         Console.WriteLine(money.CurrencyInfo.Code);
         Console.WriteLine(money.CurrencyInfo.DisplayCulture);
@@ -67,11 +67,17 @@ public class MoneyTests
         Money left = 456;
         Money right = 0.456;
 
-        Assert.IsFalse(left == right);
-        Assert.IsFalse(left.Equals(right));
-        Assert.IsFalse((long)left == (long)right);
-        Assert.IsFalse(left == (long)right);
-        Assert.IsFalse((long)left == right);
+        Assert.That(left, Is.Not.EqualTo(right));
+        Assert.Multiple(() =>
+        {
+            Assert.That(left, Is.Not.EqualTo(right));
+            Assert.That((long)left, Is.Not.EqualTo((long)right));
+        });
+        Assert.Multiple(() =>
+        {
+            Assert.That(left, Is.Not.EqualTo((long)right));
+            Assert.That((long)left, Is.Not.EqualTo(right));
+        });
     }
 
     [Test]
@@ -85,7 +91,7 @@ public class MoneyTests
         // Display the fr-FR money in en-CA format
         var actual = expectedMoney.DisplayIn(new CultureInfo("en-CA"));
         Console.WriteLine(actual);
-        Assert.AreNotEqual(expected, actual);
+        Assert.That(actual, Is.Not.EqualTo(expected));
     }
 
     [Test]
@@ -99,7 +105,7 @@ public class MoneyTests
         // Display the en-US money in en-CA format with "USD" disambiguation
         var actual = expectedMoney.DisplayIn(new CultureInfo("en-CA"));
         Console.WriteLine(actual);
-        Assert.AreNotEqual(expected, actual);
+        Assert.That(actual, Is.Not.EqualTo(expected));
     }
 
     [Test]
@@ -107,7 +113,7 @@ public class MoneyTests
     {
         Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
         var money = new Money(Currency.CAD, 1000);
-        Assert.AreEqual(new CultureInfo("fr-CA"), money.CurrencyInfo.DisplayCulture);
+        Assert.That(money.CurrencyInfo.DisplayCulture, Is.EqualTo(new CultureInfo("fr-CA")));
         Console.WriteLine(money.ToString());
     }
 
@@ -118,7 +124,7 @@ public class MoneyTests
         const double right = 2.00;
 
         Money total = left / right;
-        Assert.AreEqual(10.00, (double)total);
+        Assert.That((double)total, Is.EqualTo(10.00));
     }
 
     [Test]
@@ -128,7 +134,7 @@ public class MoneyTests
         const decimal right = 2.00m;
 
         Money total = left / right;
-        Assert.AreEqual(10.00m, total);
+        Assert.That(total, Is.EqualTo(10.00m));
     }
 
     [Test]
@@ -138,7 +144,7 @@ public class MoneyTests
         var right = new Money(-1);
 
         var total = right / left;
-        Assert.AreEqual(-1, total);
+        Assert.That(total, Is.EqualTo(-1));
     }
 
     [Test]
@@ -148,7 +154,7 @@ public class MoneyTests
         var right = new Money(-1m);
 
         var total = right / left;
-        Assert.AreEqual(-1m, total);
+        Assert.That(total, Is.EqualTo(-1m));
     }
 
     [Test]
@@ -158,7 +164,7 @@ public class MoneyTests
         var right = new Money(1);
 
         var total = right / left;
-        Assert.AreEqual(1, total);
+        Assert.That(total, Is.EqualTo(1));
     }
 
     [Test]
@@ -168,7 +174,7 @@ public class MoneyTests
         var right = new Money(1m);
 
         var total = right / left;
-        Assert.AreEqual(1m, total);
+        Assert.That(total, Is.EqualTo(1m));
     }
 
     [Test]
@@ -179,7 +185,7 @@ public class MoneyTests
 
         var total = left / right; // 3.461538461538462
 
-        Assert.AreEqual(3.46, (double)total);
+        Assert.That((double)total, Is.EqualTo(3.46));
     }
 
     [Test]
@@ -190,21 +196,21 @@ public class MoneyTests
 
         var total = left / right; // 3.461538461538462
 
-        Assert.AreEqual(3.46m, total);
+        Assert.That(total, Is.EqualTo(3.46m));
     }
 
     [Test]
     public void Can_handle_small_fractions()
     {
         Money total = 0.1;
-        Assert.AreEqual(0.10, (double)total);
+        Assert.That((double)total, Is.EqualTo(0.10));
     }
 
     [Test]
     public void Can_handle_small_fractions_with_decimals()
     {
         Money total = 0.1m;
-        Assert.AreEqual(0.10m, total);
+        Assert.That(total, Is.EqualTo(0.10m));
     }
 
     [Test]
@@ -214,7 +220,7 @@ public class MoneyTests
         var right = new Money(1.00);
 
         var total = right * left;
-        Assert.AreEqual(1.00, (double)total);
+        Assert.That((double)total, Is.EqualTo(1.00));
     }
 
     [Test]
@@ -224,7 +230,7 @@ public class MoneyTests
         var right = new Money(1.00m);
 
         var total = right * left;
-        Assert.AreEqual(1.00m, total);
+        Assert.That(total, Is.EqualTo(1.00m));
     }
 
     [Test]
@@ -234,7 +240,7 @@ public class MoneyTests
         var right = new Money(20.00);
 
         var total = right * left;
-        Assert.AreEqual(200.00, (double)total);
+        Assert.That((double)total, Is.EqualTo(200.00));
     }
 
     [Test]
@@ -244,7 +250,7 @@ public class MoneyTests
         var right = new Money(20.00m);
 
         var total = right * left;
-        Assert.AreEqual(200.00m, total);
+        Assert.That(total, Is.EqualTo(200.00m));
     }
 
     [Test]
@@ -254,7 +260,7 @@ public class MoneyTests
         const double right = -1;
 
         Money total = right * left;
-        Assert.AreEqual(-1, (double)total);
+        Assert.That((double)total, Is.EqualTo(-1));
     }
 
     [Test]
@@ -264,7 +270,7 @@ public class MoneyTests
         const double right = 1;
 
         Money total = right * left;
-        Assert.AreEqual(1, (double)total);
+        Assert.That((double)total, Is.EqualTo(1));
     }
 
     [Test]
@@ -274,7 +280,7 @@ public class MoneyTests
         var right = new Money(4.00);
 
         var total = right * left;
-        Assert.AreEqual(16.00, (double)total);
+        Assert.That((double)total, Is.EqualTo(16.00));
     }
 
     [Test]
@@ -283,13 +289,13 @@ public class MoneyTests
         Money total = 0.335678 * 345; // 115.80891
 
         // Loss of precision based on rounding rules
-        Assert.AreEqual(115.81, (double)total);
+        Assert.That((double)total, Is.EqualTo(115.81));
 
         // Adding .005 to 115.81 would equal 115.82
         // due to rounding if precision was lost
         total += 0.005; // 115.81391
 
-        Assert.AreEqual(115.81, (double)total);
+        Assert.That((double)total, Is.EqualTo(115.81));
     }
 
     [Test]
@@ -298,13 +304,13 @@ public class MoneyTests
         Money total = 0.335678m * 345m; // 115.80891
 
         // Loss of precision based on rounding rules
-        Assert.AreEqual(115.81m, total);
+        Assert.That(total, Is.EqualTo(115.81m));
 
         // Adding .005 to 115.81 would equal 115.82
         // due to rounding if precision was lost
         total += 0.005m; // 115.81391
 
-        Assert.AreEqual(115.81m, total);
+        Assert.That(total, Is.EqualTo(115.81m));
     }
 
     [Test]
@@ -313,12 +319,12 @@ public class MoneyTests
         Money total = 0.335678 * 345; // 115.80891
 
         // Loss of precision based on rounding rules
-        Assert.AreEqual(115.81, (double)total);
+        Assert.That((double)total, Is.EqualTo(115.81));
 
         // This number has greater precision than the original
         total += .00082809; // 115.80973809
 
-        Assert.AreEqual(115.81, (double)total);
+        Assert.That((double)total, Is.EqualTo(115.81));
     }
 
     [Test]
@@ -327,12 +333,12 @@ public class MoneyTests
         Money total = 0.335678m * 345m; // 115.80891
 
         // Loss of precision based on rounding rules
-        Assert.AreEqual(115.81m, total);
+        Assert.That(total, Is.EqualTo(115.81m));
 
         // This number has greater precision than the original
         total += .00082809m; // 115.80973809
 
-        Assert.AreEqual(115.81m, total);
+        Assert.That(total, Is.EqualTo(115.81m));
     }
 
     [Test]
@@ -341,12 +347,12 @@ public class MoneyTests
         Money total = 0.335678 * 345; // 115.80891
 
         // Loss of precision based on rounding rules
-        Assert.AreEqual(115.81, (double)total);
+        Assert.That((double)total, Is.EqualTo(115.81));
 
         // This number has lesser precision than the original
         total += .456; // 116.26491
 
-        Assert.AreEqual(116.26, (double)total);
+        Assert.That((double)total, Is.EqualTo(116.26));
     }
 
     [Test]
@@ -355,12 +361,12 @@ public class MoneyTests
         Money total = 0.335678m * 345m; // 115.80891
 
         // Loss of precision based on rounding rules
-        Assert.AreEqual(115.81m, total);
+        Assert.That(total, Is.EqualTo(115.81m));
 
         // This number has lesser precision than the original
         total += .456m; // 116.26491
 
-        Assert.AreEqual(116.26m, total);
+        Assert.That(total, Is.EqualTo(116.26m));
     }
 
     [Test]
@@ -370,7 +376,7 @@ public class MoneyTests
         const double right = 20.00;
 
         Money total = right - left;
-        Assert.AreEqual(10.00, (double)total);
+        Assert.That((double)total, Is.EqualTo(10.00));
     }
 
     [Test]
