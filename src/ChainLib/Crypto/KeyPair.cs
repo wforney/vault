@@ -28,14 +28,7 @@
                    EqualityComparer<byte[]>.Default.Equals(this.PrivateKey, other.PrivateKey);
         }
 
-        public override int GetHashCode()
-        {
-            int hashCode = 605523053;
-            hashCode = (hashCode * -1521134295) + this.Index.GetHashCode();
-            hashCode = (hashCode * -1521134295) + EqualityComparer<byte[]>.Default.GetHashCode(this.PublicKey);
-            hashCode = (hashCode * -1521134295) + EqualityComparer<byte[]>.Default.GetHashCode(this.PrivateKey);
-            return hashCode;
-        }
+        public override int GetHashCode() => HashCode.Combine(this.Index, this.PublicKey, this.PrivateKey);
 
         public static bool operator ==(KeyPair pair1, KeyPair pair2) => EqualityComparer<KeyPair>.Default.Equals(pair1, pair2);
 

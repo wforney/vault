@@ -26,7 +26,7 @@ internal static class Security
 {
     public static void Clear(Array array)
     {
-        if (array != null) { Array.Clear(array, 0, array.Length); }
+        if (array is not null) { Array.Clear(array, 0, array.Length); }
     }
 
     public static byte[] GenerateRandomBytes(int count)

@@ -1,4 +1,6 @@
-﻿namespace ChainLib.Sqlite;
+﻿// Ignore Spelling: Sqlite
+
+namespace ChainLib.Sqlite;
 
 using Microsoft.Extensions.Logging;
 using System.IO;
@@ -38,7 +40,7 @@ public abstract class SqliteRepository
             return;
         }
 
-        this._logger?.LogInformation($"Creating and migrating database at '{this.DataFile}'");
+        this._logger?.LogInformation("Creating and migrating database at '{DataFile}'", this.DataFile);
         this.MigrateToLatest();
     }
 
@@ -48,13 +50,13 @@ public abstract class SqliteRepository
 
     public void Purge()
     {
-        this._logger?.LogInformation($"Deleting database at '{this.DataFile}'");
+        this._logger?.LogInformation("Deleting database at '{DataFile}'", this.DataFile);
         File.Delete(this.DataFile);
 
         string directoryName = Path.GetDirectoryName(this.DataFile);
         if (Directory.GetFiles(directoryName, "*.*", SearchOption.AllDirectories).Length > 0)
         {
-            this._logger?.LogInformation($"Deleting database directory '{directoryName}' as it is no longer in use");
+            this._logger?.LogInformation("Deleting database directory '{DirectoryName}' as it is no longer in use", directoryName);
             Directory.Delete(directoryName, true);
         }
     }

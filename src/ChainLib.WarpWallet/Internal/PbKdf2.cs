@@ -26,12 +26,12 @@ using System.Security.Cryptography;
 /// <summary>
 /// Implements the PBKDF2 key derivation function.
 /// </summary>
-/// 
+///
 /// <example>
 /// <code title="Computing a Derived Key">
 /// using System.Security.Cryptography;
 /// using CryptSharp.Utility;
-/// 
+///
 /// // Compute a 128-byte derived key using HMAC-SHA256, 1000 iterations, and a given key and salt.
 /// byte[] derivedKey = Pbkdf2.ComputeDerivedKey(new HMACSHA256(key), salt, 1000, 128);
 /// </code>
@@ -70,7 +70,9 @@ public class Pbkdf2 : Stream
         Check.Length("salt", salt, 0, int.MaxValue - 4);
         Check.Range("iterations", iterations, 1, int.MaxValue);
         if (hmacAlgorithm.HashSize == 0 || hmacAlgorithm.HashSize % 8 != 0)
-        { throw Internal.Exceptions.Argument("hmacAlgorithm", "Unsupported hash size."); }
+        {
+            throw Exceptions.Argument("hmacAlgorithm", "Unsupported hash size.");
+        }
 
         int hmacLength = hmacAlgorithm.HashSize / 8;
         this._saltBuffer = new byte[salt.Length + 4]; Array.Copy(salt, this._saltBuffer, salt.Length);
@@ -89,7 +91,7 @@ public class Pbkdf2 : Stream
 
         byte[] buffer = new byte[count];
         int bytes = this.Read(buffer, 0, count);
-        return bytes < count ? throw Internal.Exceptions.Argument("count", "Can only return {0} bytes.", bytes) : buffer;
+        return bytes < count ? throw Exceptions.Argument("count", "Can only return {0} bytes.", bytes) : buffer;
     }
 
     /// <summary>
@@ -106,8 +108,11 @@ public class Pbkdf2 : Stream
     /// <param name="iterations">The number of iterations to apply.</param>
     /// <param name="derivedKeyLength">The desired length of the derived key.</param>
     /// <returns>The derived key.</returns>
-    public static byte[] ComputeDerivedKey(KeyedHashAlgorithm hmacAlgorithm, byte[] salt, int iterations,
-                                               int derivedKeyLength)
+    public static byte[] ComputeDerivedKey(
+        KeyedHashAlgorithm hmacAlgorithm,
+        byte[] salt,
+        int iterations,
+        int derivedKeyLength)
     {
         Check.Range("derivedKeyLength", derivedKeyLength, 0, int.MaxValue);
 
@@ -193,18 +198,18 @@ public class Pbkdf2 : Stream
             SeekOrigin.Begin => offset,
             SeekOrigin.Current => this.Position + offset,
             SeekOrigin.End => this.Length + offset,
-            _ => throw Internal.Exceptions.ArgumentOutOfRange("origin", "Unknown seek type."),
+            _ => throw Exceptions.ArgumentOutOfRange("origin", "Unknown seek type."),
         };
-        if (pos < 0) { throw Internal.Exceptions.Argument("offset", "Can't seek before the stream start."); }
+        if (pos < 0) { throw Exceptions.Argument("offset", "Can't seek before the stream start."); }
 
         this.Position = pos; return pos;
     }
 
     /// <exclude />
-    public override void SetLength(long value) => throw Internal.Exceptions.NotSupported();
+    public override void SetLength(long value) => throw Exceptions.NotSupported();
 
     /// <exclude />
-    public override void Write(byte[] buffer, int offset, int count) => throw Internal.Exceptions.NotSupported();
+    public override void Write(byte[] buffer, int offset, int count) => throw Exceptions.NotSupported();
 
     /// <exclude />
     public override bool CanRead => true;
@@ -228,7 +233,7 @@ public class Pbkdf2 : Stream
         get => this._pos;
         set
         {
-            if (this._pos < 0) { throw Internal.Exceptions.Argument(null, "Can't seek before the stream start."); }
+            if (this._pos < 0) { throw Exceptions.Argument(null, "Can't seek before the stream start."); }
 
             this._pos = value;
         }

@@ -1,4 +1,6 @@
-﻿namespace ChainLib.Sqlite;
+﻿// Ignore Spelling: Sqlite
+
+namespace ChainLib.Sqlite;
 
 using ChainLib.Models;
 using ChainLib.Serialization;
@@ -11,26 +13,15 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-public class SqliteBlockStore : SqliteRepository, IBlockStore
+public class SqliteBlockStore(
+    string baseDirectory,
+    string subDirectory,
+    string databaseName,
+    Block genesisBlock,
+    IBlockObjectTypeProvider typeProvider,
+    ILogger<SqliteBlockStore> logger) : SqliteRepository(baseDirectory, subDirectory, databaseName, logger), IBlockStore
 {
-    private readonly Block _genesisBlock;
-    private readonly IBlockObjectTypeProvider _typeProvider;
-    private readonly ILogger<SqliteBlockStore> _logger;
-
-    public SqliteBlockStore(
-        string baseDirectory,
-        string subDirectory,
-        string databaseName,
-        Block genesisBlock,
-        IBlockObjectTypeProvider typeProvider,
-        ILogger<SqliteBlockStore> logger) : base(baseDirectory, subDirectory, databaseName, logger)
-    {
-        this._genesisBlock = genesisBlock;
-        this._typeProvider = typeProvider;
-        this._logger = logger;
-    }
-
-    public Task<Block> GetGenesisBlockAsync() => Task.FromResult(this._genesisBlock);
+    public Task<Block> GetGenesisBlockAsync() => Task.FromResult(genesisBlock);
 
     public async Task<long> GetLengthAsync()
     {
@@ -163,7 +154,7 @@ public class SqliteBlockStore : SqliteRepository, IBlockStore
             using SqliteConnection db = new($"Data Source={this.DataFile}");
             _ = db.Execute(@"
 CREATE TABLE IF NOT EXISTS 'Block'
-(  
+(
     'Index' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     'Version' INTEGER NOT NULL,
     'PreviousHash' VARCHAR(64) NOT NULL, 
@@ -177,7 +168,7 @@ CREATE TABLE IF NOT EXISTS 'Block'
         }
         catch (SqliteException e)
         {
-            this._logger?.LogError(e, "Error migrating blocks database");
+            logger?.LogError(e, "Error migrating blocks database");
             throw;
         }
     }
@@ -194,9 +185,9 @@ CREATE TABLE IF NOT EXISTS 'Block'
         {
             using BinaryWriter bw = new(ms, Encoding.UTF8);
             // Version:
-            BlockSerializeContext context = new(bw, this._typeProvider);
+            BlockSerializeContext context = new(bw, typeProvider);
 
-            if (context.typeProvider.SecretKey != null)
+            if (context.typeProvider.SecretKey is not null)
             {
                 // Nonce:
                 byte[] nonce = StreamEncryption.GenerateNonceChaCha20();
@@ -205,7 +196,7 @@ CREATE TABLE IF NOT EXISTS 'Block'
                 // Data:
                 using MemoryStream ems = new();
                 using BinaryWriter ebw = new(ems, Encoding.UTF8);
-                BlockSerializeContext ec = new(ebw, this._typeProvider, context.Version);
+                BlockSerializeContext ec = new(ebw, typeProvider, context.Version);
                 block.SerializeObjects(ec);
                 context.bw.WriteBuffer(StreamEncryption.EncryptChaCha20(ems.ToArray(), nonce, ec.typeProvider.SecretKey));
             }
@@ -227,16 +218,16 @@ CREATE TABLE IF NOT EXISTS 'Block'
         using MemoryStream ms = new(data);
         using BinaryReader br = new(ms);
         // Version:
-        BlockDeserializeContext context = new(br, this._typeProvider);
+        BlockDeserializeContext context = new(br, typeProvider);
 
         // Nonce:
         byte[] nonce = context.br.ReadBuffer();
-        if (nonce != null)
+        if (nonce is not null)
         {
             // Data:
-            using MemoryStream dms = new(StreamEncryption.EncryptChaCha20(context.br.ReadBuffer(), nonce, this._typeProvider.SecretKey));
+            using MemoryStream dms = new(StreamEncryption.EncryptChaCha20(context.br.ReadBuffer(), nonce, typeProvider.SecretKey));
             using BinaryReader dbr = new(dms);
-            BlockDeserializeContext dc = new(dbr, this._typeProvider);
+            BlockDeserializeContext dc = new(dbr, typeProvider);
             block.DeserializeObjects(dc);
         }
         else

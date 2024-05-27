@@ -35,7 +35,7 @@ internal static class Exceptions
 
     public static ArgumentNullException ArgumentNull(string valueName)
     {
-        ArgumentNullException e = valueName == null
+        ArgumentNullException e = valueName is null
             ? new ArgumentNullException()
             : new ArgumentNullException(valueName);
         return e;
@@ -45,7 +45,7 @@ internal static class Exceptions
         (string valueName, string message, params object[] args)
     {
         message = string.Format(message, args);
-        ArgumentOutOfRangeException e = valueName == null
+        ArgumentOutOfRangeException e = valueName is null
             ? new ArgumentOutOfRangeException(message, (Exception)null)
             : new ArgumentOutOfRangeException(valueName, message);
         return e;

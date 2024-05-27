@@ -10,7 +10,7 @@
         /// <summary>
         /// Produces a password hash suitable for long term storage. This means using a random salt per password, high entropy, and
         /// high number of key stretching operations.
-        /// 
+        ///
         /// It's important to distinguish this from a Wallet address' private key.
         /// Normally, unless you're creating a "brain wallet", this should never be used as the seed for a private key, since
         /// remembering the password is the only thing necessary to derive a private key.

@@ -7,7 +7,7 @@
 
     /// <summary>
     /// https://github.com/adamcaudill/Base58Check
-    /// Base58Check Encoding / Decoding (Bitcoin-style) 
+    /// Base58Check Encoding / Decoding (Bitcoin-style)
     /// </summary>
     /// <remarks>
     /// See here for more details: https://en.bitcoin.it/wiki/Base58Check_encoding
@@ -72,7 +72,7 @@
         /// <returns>Returns decoded data if valid; throws FormatException if invalid</returns>
         public static byte[] DecodePlain(string data)
         {
-            // Decode Base58 string to BigInteger 
+            // Decode Base58 string to BigInteger
             BigInteger intData = 0;
             for (int i = 0; i < data.Length; i++)
             {
@@ -118,9 +118,8 @@
 
         private static byte[] GetCheckSum(byte[] data)
         {
-            SHA256 sha256 = new SHA256Managed();
-            byte[] hash1 = sha256.ComputeHash(data);
-            byte[] hash2 = sha256.ComputeHash(hash1);
+            byte[] hash1 = SHA256.HashData(data);
+            byte[] hash2 = SHA256.HashData(hash1);
 
             byte[] result = new byte[CheckSumSize];
             Buffer.BlockCopy(hash2, 0, result, 0, result.Length);

@@ -12,32 +12,21 @@ using System.Threading.Tasks;
 /// </code>
 /// <see href="https://keybase.io/warp" />
 /// </summary>
-public class WarpWalletProvider : IWalletProvider
+public class WarpWalletProvider(IWalletRepository repository, IWalletAddressProvider addresses, IWalletFactoryProvider factory) : IWalletProvider
 {
-    private readonly IWalletRepository _repository;
-    private readonly IWalletSecretProvider _secrets;
-    private readonly IWalletAddressProvider _addresses;
-    private readonly IWalletFactoryProvider _factory;
+    private readonly WarpWalletSecretProvider _secrets = new();
 
-    public WarpWalletProvider(IWalletRepository repository, IWalletAddressProvider addresses, IWalletFactoryProvider factory)
-    {
-        this._repository = repository;
-        this._secrets = new WarpWalletSecretProvider();
-        this._addresses = addresses;
-        this._factory = factory;
-    }
-
-    public string GenerateAddress(Wallet wallet) => this._addresses.GenerateAddress(wallet);
+    public string GenerateAddress(Wallet wallet) => addresses.GenerateAddress(wallet);
 
     public byte[] GenerateSecret(params object[] args) => this._secrets.GenerateSecret(args);
 
-    public Wallet Create(params object[] args) => this._factory.Create(args);
+    public Wallet Create(params object[] args) => factory.Create(args);
 
-    public Task<IEnumerable<Wallet>> GetAllAsync() => this._repository.GetAllAsync();
+    public Task<IEnumerable<Wallet>> GetAllAsync() => repository.GetAllAsync();
 
-    public Task<Wallet> GetByIdAsync(string id) => this._repository.GetByIdAsync(id);
+    public Task<Wallet> GetByIdAsync(string id) => repository.GetByIdAsync(id);
 
-    public Task<Wallet> AddAsync(Wallet wallet) => this._repository.AddAsync(wallet);
+    public Task<Wallet> AddAsync(Wallet wallet) => repository.AddAsync(wallet);
 
-    public Task SaveAddressesAsync(Wallet wallet) => this._repository.SaveAddressesAsync(wallet);
+    public Task SaveAddressesAsync(Wallet wallet) => repository.SaveAddressesAsync(wallet);
 }

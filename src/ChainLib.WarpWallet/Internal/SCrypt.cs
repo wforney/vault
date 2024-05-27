@@ -61,9 +61,14 @@ public static class SCrypt
     /// </param>
     /// <param name="derivedKeyLength">The desired length of the derived key.</param>
     /// <returns>The derived key.</returns>
-    public static byte[] ComputeDerivedKey(byte[] key, byte[] salt,
-                                           int cost, int blockSize, int parallel, int? maxThreads,
-                                           int derivedKeyLength)
+    public static byte[] ComputeDerivedKey(
+        byte[] key,
+        byte[] salt,
+        int cost,
+        int blockSize,
+        int parallel,
+        int? maxThreads,
+        int derivedKeyLength)
     {
         Check.Range("derivedKeyLength", derivedKeyLength, 0, int.MaxValue);
 
@@ -98,8 +103,13 @@ public static class SCrypt
     ///     <c>null</c> will use as many threads as possible.
     /// </param>
     /// <returns>The effective salt.</returns>
-    public static byte[] GetEffectivePbkdf2Salt(byte[] key, byte[] salt,
-                                                int cost, int blockSize, int parallel, int? maxThreads)
+    public static byte[] GetEffectivePbkdf2Salt(
+        byte[] key,
+        byte[] salt,
+        int cost,
+        int blockSize,
+        int parallel,
+        int? maxThreads)
     {
         Check.Null("key", key); Check.Null("salt", salt);
         return MFcrypt(key, salt, cost, blockSize, parallel, maxThreads);
@@ -131,22 +141,34 @@ public static class SCrypt
     ///     <c>null</c> will use as many threads as possible.
     /// </param>
     /// <returns>The derived key stream.</returns>
-    public static Pbkdf2 GetStream(byte[] key, byte[] salt,
-                                   int cost, int blockSize, int parallel, int? maxThreads)
+    public static Pbkdf2 GetStream(
+        byte[] key,
+        byte[] salt,
+        int cost,
+        int blockSize,
+        int parallel,
+        int? maxThreads)
     {
         byte[] B = GetEffectivePbkdf2Salt(key, salt, cost, blockSize, parallel, maxThreads);
         Pbkdf2 kdf = new(new HMACSHA256(key), B, 1);
         Security.Clear(B); return kdf;
     }
 
-    private static byte[] MFcrypt(byte[] P, byte[] S,
-                              int cost, int blockSize, int parallel, int? maxThreads)
+    private static byte[] MFcrypt(
+        byte[] P,
+        byte[] S,
+        int cost,
+        int blockSize,
+        int parallel,
+        int? maxThreads)
     {
         int MFLen = blockSize * 128;
         maxThreads ??= int.MaxValue;
 
         if (!BitMath.IsPositivePowerOf2(cost))
-        { throw Internal.Exceptions.ArgumentOutOfRange("cost", "Cost must be a positive power of 2."); }
+        {
+            throw Exceptions.ArgumentOutOfRange("cost", "Cost must be a positive power of 2.");
+        }
 
         Check.Range("blockSize", blockSize, 1, int.MaxValue / 128);
         Check.Range("parallel", parallel, 1, int.MaxValue / MFLen);
@@ -165,8 +187,13 @@ public static class SCrypt
         return B;
     }
 
-    private static void ThreadSMixCalls(uint[] B0, int MFLen,
-                                    int cost, int blockSize, int parallel, int maxThreads)
+    private static void ThreadSMixCalls(
+        uint[] B0,
+        int MFLen,
+        int cost,
+        int blockSize,
+        int parallel,
+        int maxThreads)
     {
         int current = 0;
         void workerThread()

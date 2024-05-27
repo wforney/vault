@@ -17,8 +17,8 @@ using System.Text;
 /// </summary>
 public class WarpWalletSecretProvider : IWalletSecretProvider
 {
-    private static readonly byte[] OneByte = { 0x1 };
-    private static readonly byte[] TwoByte = { 0x2 };
+    private static readonly byte[] OneByte = [0x1];
+    private static readonly byte[] TwoByte = [0x2];
 
     public byte[] GenerateSecret(params object[] args)
     {
@@ -36,10 +36,10 @@ public class WarpWalletSecretProvider : IWalletSecretProvider
         byte[] s1 = SCrypt.ComputeDerivedKey(scryptPassphrase, scryptSalt, (int)Math.Pow(2, 18), 8, 1, null, 32);
         byte[] s2 = Pbkdf2.ComputeDerivedKey(new HMACSHA256(pbkdfPassphase), pbkdfSalt, (int)Math.Pow(2, 16), 32);
 
-        byte[] s3 = { };
+        byte[] s3 = [];
         for (int i = 0; i < s1.Length; i++)
         {
-            s3 = s3.ConcatArrays(new[] { (byte)(s1[i] ^ s2[i]) });
+            s3 = s3.ConcatArrays([(byte)(s1[i] ^ s2[i])]);
         }
 
         return s3;

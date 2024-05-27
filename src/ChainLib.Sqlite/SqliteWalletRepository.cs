@@ -1,4 +1,6 @@
-﻿namespace ChainLib.Sqlite;
+﻿// Ignore Spelling: Sqlite
+
+namespace ChainLib.Sqlite;
 
 using ChainLib.Crypto;
 using ChainLib.Wallets;
@@ -10,13 +12,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
-public class SqliteWalletRepository : SqliteRepository, IWalletRepository
+public class SqliteWalletRepository(string baseDirectory, string subDirectory, string databaseName, ILogger<SqliteWalletRepository> logger)
+    : SqliteRepository(baseDirectory, subDirectory, databaseName, logger), IWalletRepository
 {
-    private readonly ILogger<SqliteWalletRepository> _logger;
-
-    public SqliteWalletRepository(string baseDirectory, string subDirectory, string databaseName, ILogger<SqliteWalletRepository> logger)
-        : base(baseDirectory, subDirectory, databaseName, logger) => this._logger = logger;
-
     public async Task<IEnumerable<Wallet>> GetAllAsync()
     {
         using SqliteConnection db = new($"Data Source={this.DataFile}");
@@ -28,13 +26,14 @@ public class SqliteWalletRepository : SqliteRepository, IWalletRepository
 
         _ = await db.QueryAsync<Wallet, KeyPair, Wallet>(sql, (parent, child) =>
         {
-            if (!wallets.ContainsKey(parent.Id))
+            if (!wallets.TryGetValue(parent.Id, out Wallet value))
             {
-                wallets.Add(parent.Id, parent);
+                value = parent;
+                wallets.Add(parent.Id, value);
             }
 
-            wallets[parent.Id].KeyPairs.Add(child);
-            return wallets[parent.Id];
+            value.KeyPairs.Add(child);
+            return value;
         }, splitOn: "WalletId");
 
         return wallets.Values;
@@ -64,7 +63,7 @@ public class SqliteWalletRepository : SqliteRepository, IWalletRepository
     {
         if (wallet.KeyPairs.Count == 0)
         {
-            throw new ArgumentException("Wallet contains no keypairs", nameof(wallet));
+            throw new ArgumentException("Wallet contains no key pairs", nameof(wallet));
         }
 
         using (SqliteConnection db = new($"Data Source={this.DataFile}"))
@@ -115,14 +114,14 @@ public class SqliteWalletRepository : SqliteRepository, IWalletRepository
             using SqliteConnection db = new($"Data Source={this.DataFile}");
             _ = db.Execute(@"
 CREATE TABLE IF NOT EXISTS 'Wallet'
-(  
-    'Id' VARCHAR(64) NOT NULL PRIMARY KEY, 
+(
+    'Id' VARCHAR(64) NOT NULL PRIMARY KEY,
     'PasswordHash' VARCHAR(64) NOT NULL,
     'Secret' VARCHAR(1024) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS 'Address'
-(  
+(
     'WalletId' VARCHAR(64) NOT NULL,
     'Index' INTEGER NOT NULL, 
     'PrivateKey' VARCHAR(1024) NOT NULL,
@@ -133,7 +132,7 @@ CREATE TABLE IF NOT EXISTS 'Address'
         }
         catch (SqliteException e)
         {
-            this._logger?.LogError(e, "Error migrating wallets database");
+            logger?.LogError(e, "Error migrating wallets database");
             throw;
         }
     }
